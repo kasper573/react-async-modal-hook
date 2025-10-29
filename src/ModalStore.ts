@@ -158,7 +158,7 @@ export type ModalResolution<Component extends AnyModalComponent> =
 /**
  * The props that any component that wants to be compatible with useModal must accept.
  */
-export interface ModalProps<Resolution> {
+export interface ModalProps<Resolution = void> {
   instanceId: InstanceId;
   open: boolean;
   resolve: (value: Resolution) => unknown;
