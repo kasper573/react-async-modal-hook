@@ -31,9 +31,8 @@ export function ModalInlet<Component extends AnyModalComponent>({
 
   return (
     <ModalPortal>
-      {instances
-        ?.entries()
-        .map(([instanceId, { visible, props }]) => (
+      {[...(instances?.entries() ?? [])].map(
+        ([instanceId, { visible, props }]) => (
           <Component
             key={instanceId}
             instanceId={instanceId}
@@ -42,7 +41,8 @@ export function ModalInlet<Component extends AnyModalComponent>({
             {...(defaultProps as any)}
             {...props}
           />
-        ))}
+        ),
+      )}
     </ModalPortal>
   );
 }
