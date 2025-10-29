@@ -1,11 +1,13 @@
 import { useContext, useSyncExternalStore } from "react";
-import { AnyModalComponent } from "./ModalStore";
+import { AnyModalComponent, ModalProps } from "./ModalStore";
 import { ModalContext } from "./ModalContext";
 import { ModalPortal } from "./ModalPortal";
 
-export interface ModalInletProps<Component extends AnyModalComponent> {
-  component: Component;
-  defaultProps?: Partial<React.ComponentProps<Component>>;
+// We don't bother with generics here since this component is only used internally.
+// (Generics would only improve the dx for using the component directly outside the library)
+export interface ModalInletProps {
+  component: AnyModalComponent;
+  defaultProps?: DefaultModalProps<ModalProps<any>>;
 }
 
 /**
@@ -16,10 +18,10 @@ export interface ModalInletProps<Component extends AnyModalComponent> {
  * Visibility and portalling to the ModalOutlet is handeled internally,
  * so you should always render it unconditionally.
  */
-export function ModalInlet<Component extends AnyModalComponent>({
+export function ModalInlet({
   component: Component,
   defaultProps,
-}: ModalInletProps<Component>) {
+}: ModalInletProps) {
   const store = useContext(ModalContext);
   const instances = useSyncExternalStore(
     store.subscribe,
@@ -36,7 +38,7 @@ export function ModalInlet<Component extends AnyModalComponent>({
             instanceId={instanceId}
             open={visible}
             resolve={(value) => store.resolve(Component, instanceId, value)}
-            {...(defaultProps as any)}
+            {...defaultProps}
             {...props}
           />
         ),
@@ -45,6 +47,11 @@ export function ModalInlet<Component extends AnyModalComponent>({
   );
 }
 
-// export type ModalInletProps<Component extends AnyModalComponent> =
-//   ModalInletInternalProps<Component> &
-//     Omit<ComponentProps<Component>, keyof ModalProps<unknown>>;
+export type ExcessModalProps<Props extends ModalProps<any>> = Omit<
+  Props,
+  keyof ModalProps<unknown>
+>;
+
+export type DefaultModalProps<Props extends ModalProps<any>> = Partial<
+  ExcessModalProps<Props>
+>;

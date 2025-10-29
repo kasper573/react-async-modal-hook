@@ -150,11 +150,6 @@ export type ModalStoreListener = (state: ModalStoreState) => void;
 
 export type AnyModalComponent = ComponentType<ModalProps<any>>;
 
-export type ModalResolution<Component extends AnyModalComponent> =
-  Component extends ComponentType<ModalProps<infer Resolution>>
-    ? Resolution
-    : never;
-
 /**
  * The props that any component that wants to be compatible with useModal must accept.
  */

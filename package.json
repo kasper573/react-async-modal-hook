@@ -13,6 +13,7 @@
     "dist"
   ],
   "scripts": {
+    "typecheck": "tsc --noEmit",
     "build": "tsup src/index.ts --clean --dts --format esm,cjs --out-dir dist",
     "dev": "pnpm build --watch",
     "format": "prettier --write .",
