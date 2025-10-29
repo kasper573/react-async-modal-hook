@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { useModal } from "../../src";
 import { Dialog } from "../Dialog";
+import { createTestCase } from "../create-test-case";
 
-export function OpenCloseUnmount() {
+export const OpenCloseUnmount = createTestCase(() => {
   const [pageNum, setPageNum] = useState(1);
   return pageNum === 1 ? <Page1 gotoPage2={() => setPageNum(2)} /> : <Page2 />;
-}
+});
 
 function Page1({ gotoPage2 }: { gotoPage2: () => void }) {
   const [show, Inlet] = useModal(Dialog);

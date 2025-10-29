@@ -7,10 +7,26 @@ export const ResolveOneOfMany = createTestCase(() => {
   return (
     <>
       <Inlet />
-      <button onClick={() => spawn({ name: "foo", message: "This is foo" })}>
+      <button
+        onClick={() =>
+          spawn({
+            name: "foo",
+            message: "This is foo",
+            style: { position: "relative", left: -100 },
+          })
+        }
+      >
         Spawn foo
       </button>
-      <button onClick={() => spawn({ name: "bar", message: "This is bar" })}>
+      <button
+        onClick={() =>
+          spawn({
+            name: "bar",
+            message: "This is bar",
+            style: { position: "relative", right: -100 },
+          })
+        }
+      >
         Spawn bar
       </button>
     </>
