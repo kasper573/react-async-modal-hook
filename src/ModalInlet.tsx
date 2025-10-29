@@ -32,11 +32,11 @@ export function ModalInlet({
   return (
     <ModalPortal>
       {[...(instances?.entries() ?? [])].map(
-        ([instanceId, { visible, props }]) => (
+        ([instanceId, { open, props }]) => (
           <Component
             key={instanceId}
             instanceId={instanceId}
-            open={visible}
+            open={open}
             resolve={(value) => store.resolve(Component, instanceId, value)}
             {...defaultProps}
             {...props}

@@ -19,17 +19,6 @@ export class ModalStore {
     return () => this.listeners.delete(listener);
   };
 
-  private mutate<Return>(mutateFn: (state: ModalStoreState) => Return): Return {
-    let ret: Return;
-    this.#state = produce(this.#state, (draft) => {
-      ret = mutateFn(draft);
-    });
-    for (const listener of this.listeners) {
-      listener(this.#state);
-    }
-    return ret!;
-  }
-
   setOutlet(newOutlet: HTMLElement | undefined) {
     this.mutate((draft) => {
       draft.outlet = newOutlet;
@@ -70,7 +59,7 @@ export class ModalStore {
     this.mutate((draft) => {
       const instance = draft.instances.get(component)?.get(instanceId);
       if (instance) {
-        instance.visible = false;
+        instance.open = false;
       }
     });
 
@@ -81,18 +70,18 @@ export class ModalStore {
     });
   }
 
-  spawn<Resolution>(
+  async spawn<Resolution>(
     component: AnyModalComponent,
     props: ModalInstance["props"] = {},
   ): Promise<Resolution> {
-    return this.mutate((draft) => {
+    const instanceId = this.nextId();
+
+    const promise = this.mutate((draft) => {
       let componentInstances = draft.instances.get(component);
       if (!componentInstances) {
         componentInstances = new Map();
         draft.instances.set(component, componentInstances);
       }
-
-      const instanceId = this.nextId();
 
       const deferredPromise = deferPromise((promise) =>
         promise.then(async (resolution) => {
@@ -102,13 +91,26 @@ export class ModalStore {
       );
 
       componentInstances.set(instanceId, {
-        visible: true,
+        open: false,
         deferredPromise,
         props,
       });
 
       return deferredPromise.promise as Promise<Resolution>;
     });
+
+    // Wait to let the instance render as closed first.
+    // This makes it drastically easier to do enter animations in css.
+    await nextTick();
+
+    this.mutate((draft) => {
+      const instance = draft.instances.get(component)?.get(instanceId);
+      if (instance) {
+        instance.open = true;
+      }
+    });
+
+    return promise;
   }
 
   resolve<Resolution>(
@@ -124,6 +126,17 @@ export class ModalStore {
     });
   }
 
+  private mutate<Return>(mutateFn: (state: ModalStoreState) => Return): Return {
+    let ret: Return;
+    this.#state = produce(this.#state, (draft) => {
+      ret = mutateFn(draft);
+    });
+    for (const listener of this.listeners) {
+      listener(this.#state);
+    }
+    return ret!;
+  }
+
   private _idCounter = 0;
 
   nextId(): InstanceId {
@@ -137,7 +150,7 @@ export interface ModalStoreState {
 }
 
 export interface ModalInstance {
-  visible: boolean;
+  open: boolean;
   props: Record<string, unknown>;
   readonly deferredPromise: DeferredPromise<unknown>;
 }
@@ -157,4 +170,8 @@ export interface ModalProps<Resolution = void> {
   instanceId: InstanceId;
   open: boolean;
   resolve: (value: Resolution) => unknown;
+}
+
+function nextTick(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 0));
 }
