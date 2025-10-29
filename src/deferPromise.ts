@@ -1,14 +1,36 @@
-export function deferPromise<T = void>(): Deferred<T> {
-  let resolve: (value: T) => void;
-  function deferred(resolution: T) {
-    resolve(resolution);
-  }
-  deferred.promise = new Promise<T>((res) => (resolve = res));
-  return deferred as unknown as Deferred<T>;
+export function deferPromise<T>(
+  chain: (promise: Promise<T>) => Promise<T> = (p) => p,
+): DeferredPromise<T> {
+  let resolve: DeferredPromise<T>["resolve"];
+  let reject: DeferredPromise<T>["reject"];
+
+  const promise = chain(
+    new Promise<T>(
+      (_resolve, _reject) => ((resolve = _resolve), (reject = _reject)),
+    ),
+  );
+
+  let status: "resolved" | "rejected" | "pending" = "pending";
+
+  return {
+    promise,
+    resolve(value) {
+      status = "resolved";
+      resolve!(value);
+    },
+    reject(reason) {
+      status = "rejected";
+      reject!(reason);
+    },
+    get isResolved() {
+      return status === "resolved";
+    },
+  };
 }
 
-export type Deferred<T> = {
+export interface DeferredPromise<T> {
   readonly promise: Promise<T>;
-} & (IsVoidOnly<T> extends true ? () => void : (resolution: T) => void);
-
-type IsVoidOnly<T> = Exclude<T, void> extends never ? true : false;
+  readonly resolve: (value: T) => void;
+  readonly reject: (reason?: unknown) => void;
+  readonly isResolved: boolean;
+}

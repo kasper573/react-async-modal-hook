@@ -1,187 +1,165 @@
-import type { ComponentType } from "react";
-import type { PartialByKeys } from "./utilityTypes";
-import { deferPromise } from "./deferPromise";
-import type { UseSpawnSustainerProps } from "./useModalSustainer";
-import { Store } from "./Store";
+import { ComponentType } from "react";
+import { deferPromise, DeferredPromise } from "./deferPromise";
+import { produce } from "immer";
 
 export class ModalStore {
-  // Remove delays are not part of the observable Store since they have no reactive impact.
-  // They are pulled from the map when instances resolve.
-  private removeDelays = new Map<InstanceId, Promise<void>>();
+  private sustainers = new Map<InstanceId, Promise<unknown>>();
+  private listeners = new Set<ModalStoreListener>();
 
-  constructor(private store = new Store<ModalStoreState>({})) {
-    this.subscribe = this.store.subscribe.bind(this.store);
+  #state: ModalStoreState = {
+    instances: new Map(),
+  };
+
+  get state(): ModalStoreState {
+    return this.#state;
   }
 
-  get state() {
-    return this.store.state;
+  subscribe = (listener: ModalStoreListener): StoreUnsubscriber => {
+    this.listeners.add(listener);
+    return () => this.listeners.delete(listener);
+  };
+
+  private mutate<Return>(mutateFn: (state: ModalStoreState) => Return): Return {
+    let ret: Return;
+    this.#state = produce(this.#state, (draft) => {
+      ret = mutateFn(draft);
+    });
+    for (const listener of this.listeners) {
+      listener(this.#state);
+    }
+    return ret!;
   }
 
-  subscribe: Store<ModalStoreState>["subscribe"];
-
-  upsertComponent(id: ComponentId, entry: UpsertComponentPayload) {
-    return this.store.mutate((components) => {
-      if (!components[id]) {
-        components[id] = { instances: {}, ...entry };
-      } else {
-        Object.assign(components[id], entry);
-      }
+  setOutlet(newOutlet: HTMLElement | undefined) {
+    this.mutate((draft) => {
+      draft.outlet = newOutlet;
     });
   }
 
-  removeComponents(ids: ComponentId[]) {
-    return this.store.mutate((components) => {
-      for (const id of ids) {
-        delete components[id];
-      }
-    });
+  setSustainer(instanceId: InstanceId, promise?: Promise<unknown>) {
+    if (promise) {
+      this.sustainers.set(instanceId, promise);
+    } else {
+      this.sustainers.delete(instanceId);
+    }
   }
 
-  markComponentsForRemoval(ids: ComponentId[]) {
-    return this.store.mutate((components) => {
-      for (const id of ids) {
-        const component = components[id];
-        if (component) {
-          component.shouldBeRemovedWhenEmpty = true;
+  unmount(component: AnyModalComponent) {
+    this.mutate((draft) => {
+      const componentInstances = draft.instances.get(component);
+      if (!componentInstances) {
+        return;
+      }
+
+      for (const { deferredPromise } of componentInstances.values()) {
+        if (!deferredPromise.isResolved) {
+          deferredPromise.reject(
+            new Error("Modal unmounted before resolution"),
+          );
         }
       }
+
+      draft.instances.delete(component);
     });
   }
 
-  setInstanceRemoveDelay(instanceId: InstanceId, newDelay?: Promise<void>) {
-    if (newDelay) {
-      this.removeDelays.set(instanceId, newDelay);
-    } else {
-      this.removeDelays.delete(instanceId);
-    }
-  }
-
-  removeInstance(componentId: ComponentId, instanceId: InstanceId) {
-    return this.store.mutate((components) => {
-      const component = components[componentId];
-      if (!component) {
-        throw new Error(`Component ${componentId} does not exist`);
-      }
-      delete component.instances[instanceId];
-      const hasInstances = Object.keys(component.instances).length > 0;
-      if (component.shouldBeRemovedWhenEmpty && !hasInstances) {
-        this.removeComponents([componentId]);
-      }
-    });
-  }
-
-  spawnInstance<Props extends InstanceProps, Resolution>(
-    componentId: ComponentId,
+  private async removeInstance(
+    component: AnyModalComponent,
     instanceId: InstanceId,
-    props: Props,
   ) {
-    const resolveSpawnCall = deferPromise<Resolution>();
-
-    this.store.mutate((state) => {
-      const component = state[componentId];
-      if (!component) {
-        throw new Error(`Component ${componentId} does not exist`);
+    this.mutate((draft) => {
+      const instance = draft.instances.get(component)?.get(instanceId);
+      if (instance) {
+        instance.visible = false;
       }
-
-      if (component.instances[instanceId]) {
-        throw new Error(
-          `Instance ${instanceId} of component ${componentId} already exists`,
-        );
-      }
-
-      component.instances[instanceId] = {
-        open: true,
-        props,
-        resolve: (value) => {
-          this.store.mutate((components) => {
-            const instance = components[componentId].instances[instanceId];
-            instance.open = false;
-            const removeDelay = this.removeDelays.get(instanceId);
-            if (removeDelay) {
-              removeDelay.then(() =>
-                this.removeInstance(componentId, instanceId),
-              );
-            } else {
-              this.removeInstance(componentId, instanceId);
-            }
-          });
-          resolveSpawnCall(value as Resolution);
-        },
-      };
     });
 
-    return resolveSpawnCall.promise;
+    await this.sustainers.get(instanceId);
+
+    this.mutate((draft) => {
+      draft.instances.get(component)?.delete(instanceId);
+    });
   }
 
-  /**
-   * Convenience method for spawning modals outside of react.
-   * Registers a temporary component, spawns an instance, and removes the component after resolution.
-   * Use this sparingly, as the better practice is to use the react hook.
-   */
-  async spawn<Resolution, Props>(
-    component: ComponentType<Props & ModalProps<Resolution>>,
-    props: Props,
+  spawn<Resolution>(
+    component: AnyModalComponent,
+    props: ModalInstance["props"] = {},
   ): Promise<Resolution> {
-    const componentId = this.nextId();
-    this.upsertComponent(componentId, {
-      component: component as ComponentType<ModalProps<unknown>>,
-      defaultProps: {},
+    return this.mutate((draft) => {
+      let componentInstances = draft.instances.get(component);
+      if (!componentInstances) {
+        componentInstances = new Map();
+        draft.instances.set(component, componentInstances);
+      }
+
+      const instanceId = this.nextId();
+
+      const deferredPromise = deferPromise((promise) =>
+        promise.then(async (resolution) => {
+          await this.removeInstance(component, instanceId);
+          return resolution;
+        }),
+      );
+
+      componentInstances.set(instanceId, {
+        visible: true,
+        deferredPromise,
+        props,
+      });
+
+      return deferredPromise.promise as Promise<Resolution>;
     });
-    try {
-      return await this.spawnInstance(componentId, this.nextId(), props as {});
-    } finally {
-      this.removeComponents([componentId]);
-    }
+  }
+
+  resolve<Resolution>(
+    component: AnyModalComponent,
+    instanceId: InstanceId,
+    value: Resolution,
+  ): void {
+    this.mutate((draft) => {
+      const instance = draft.instances.get(component)?.get(instanceId);
+      if (instance && !instance.deferredPromise.isResolved) {
+        instance.deferredPromise.resolve(value);
+      }
+    });
   }
 
   private _idCounter = 0;
 
-  nextId<T extends string>() {
-    return (this._idCounter++).toString() as T;
+  nextId(): InstanceId {
+    return (this._idCounter++).toString();
   }
 }
 
-export type ModalStoreState = Record<ComponentId, ComponentEntry>;
-
-export interface ModalProps<ResolutionValue = void>
-  extends ResolvingComponentProps<ResolutionValue>,
-    UseSpawnSustainerProps {
-  open: boolean;
+export interface ModalStoreState {
+  readonly instances: Map<AnyModalComponent, Map<InstanceId, ModalInstance>>;
+  outlet?: HTMLElement;
 }
 
-export interface ResolvingComponentProps<ResolutionValue> {
-  resolve: (value: ResolutionValue) => void;
-}
-
-export type ComponentId = string;
-
-export type UpsertComponentPayload = Pick<
-  ComponentEntry,
-  "component" | "defaultProps"
->;
-
-export interface ComponentEntry {
-  component: ComponentType<ModalProps<unknown>>;
-  defaultProps?: Record<string, unknown>;
-  instances: Record<InstanceId, InstanceEntry>;
-  shouldBeRemovedWhenEmpty?: boolean;
+export interface ModalInstance {
+  visible: boolean;
+  props: Record<string, unknown>;
+  readonly deferredPromise: DeferredPromise<unknown>;
 }
 
 export type InstanceId = string;
 
-export interface InstanceEntry
-  extends Omit<ModalProps<unknown>, keyof UseSpawnSustainerProps> {
-  props: InstanceProps;
-}
+export type StoreUnsubscriber = () => void;
 
-export type InstanceProps<
-  ResolutionValue = unknown,
-  AdditionalComponentProps = {},
-  DefaultProps extends Partial<AdditionalComponentProps> = {},
-> = Omit<
-  PartialByKeys<
-    ModalProps<ResolutionValue> & AdditionalComponentProps,
-    keyof DefaultProps
-  >,
-  keyof ModalProps<unknown>
->;
+export type ModalStoreListener = (state: ModalStoreState) => void;
+
+export type AnyModalComponent = ComponentType<ModalProps<any>>;
+
+export type ModalResolution<Component extends AnyModalComponent> =
+  Component extends ComponentType<ModalProps<infer Resolution>>
+    ? Resolution
+    : never;
+
+/**
+ * The props that any component that wants to be compatible with useModal must accept.
+ */
+export interface ModalProps<Resolution> {
+  instanceId: InstanceId;
+  open: boolean;
+  resolve: (value: Resolution) => unknown;
+}

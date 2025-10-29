@@ -8,7 +8,7 @@ preferable to have a promise based interface, which is what this library provide
 
 - Designed for dialogs, toasts and drawers (but not limited to).
 - Lightweight with zero runtime dependencies.
-- Written in TypeScript with superb generics and inference in mind.
+- Written in TypeScript with generics and inference in mind.
 
 ### [Try it on StackBlitz](https://stackblitz.com/edit/react-async-modal-hook)
 
