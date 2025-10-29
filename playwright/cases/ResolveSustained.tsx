@@ -27,7 +27,7 @@ function SustainDialog(props: ComponentProps<typeof Dialog>) {
         <button
           onClick={() => {
             setIsReleased(true);
-            sustain.resolve(props.resolution);
+            sustain.resolve();
           }}
         >
           Release sustain

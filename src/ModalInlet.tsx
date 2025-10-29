@@ -16,6 +16,14 @@ export type ModalInletProps<Component extends AnyModalComponent> =
   ModalInletInternalProps<Component> &
     Omit<ComponentProps<Component>, keyof ModalProps<unknown>>;
 
+/**
+ * The modal inlet is what puts the modal element into the react tree.
+ * It should always be rendered where you call useModal.
+ * This pattern ensures that your modal component has access to context.
+ *
+ * Visibility and portalling to the ModalOutlet is handeled internally,
+ * so you should always render it unconditionally.
+ */
 export function ModalInlet<Component extends AnyModalComponent>({
   component: Component,
   ...defaultProps

@@ -33,11 +33,7 @@ export type ModalSpawner<Component extends AnyModalComponent> = (
 export type UseModalReturn<Component extends AnyModalComponent> = [
   spawn: ModalSpawner<Component>,
   /**
-   * The modal inlet is what puts the modal element into the react tree.
-   * It should always be rendered where you call useModal.
-   * This pattern ensures that your modal component has access to context.
-   * Visibility is handeled internally, so you should always render it unconditionally.
-   * Portalling to the ModalOutlet is also handeled
+   * A `ModalInlet` preconfigured with the given modal component.
    */
   Inlet: ComponentType<ExcessModalProps<Component>>,
 ];

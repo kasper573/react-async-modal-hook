@@ -3,7 +3,7 @@ import { deferPromise, DeferredPromise } from "./deferPromise";
 import { produce } from "immer";
 
 export class ModalStore {
-  private sustainers = new Map<InstanceId, Promise<unknown>>();
+  private sustainers = new Map<InstanceId, Promise<void>>();
   private listeners = new Set<ModalStoreListener>();
 
   #state: ModalStoreState = {
@@ -36,7 +36,7 @@ export class ModalStore {
     });
   }
 
-  setSustainer(instanceId: InstanceId, promise?: Promise<unknown>) {
+  setSustainer(instanceId: InstanceId, promise?: Promise<void>) {
     if (promise) {
       this.sustainers.set(instanceId, promise);
     } else {
