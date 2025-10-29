@@ -40,5 +40,8 @@
     "typescript": "^5",
     "vite": "5.2.13"
   },
+  "engines": {
+    "node": ">=22"
+  },
   "packageManager": "pnpm@9.0.4"
 }
