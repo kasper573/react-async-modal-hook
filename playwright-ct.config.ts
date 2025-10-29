@@ -1,18 +1,28 @@
 import { defineConfig, devices } from "@playwright/experimental-ct-react";
+import path from "path";
+
+const outputDir = ".playwright";
+const artifactsDir = path.join(outputDir, "artifacts");
+const snapshotDir = path.join(outputDir, "snapshots");
+const reportDir = path.join(outputDir, "report");
+
+const htmlReporter = [
+  "html",
+  { outputFolder: reportDir, open: "never" },
+] as const;
 
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
-  testDir: "./",
-  timeout: 10 * 1000,
-  snapshotDir: "./__snapshots__",
-  outputDir: "./test-results/",
+  outputDir: artifactsDir,
+  snapshotDir,
+  testDir: "./playwright",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: "html",
+  reporter: process.env.CI ? [htmlReporter, ["github"]] : [htmlReporter],
   use: {
     trace: "retain-on-failure",
     screenshot: "only-on-failure",
