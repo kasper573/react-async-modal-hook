@@ -1,5 +1,4 @@
 import { test, expect } from "@playwright/experimental-ct-react";
-import type { DeferredPromise } from "../src/deferPromise";
 import { NoProps } from "./cases/NoProps";
 import { SpawnProps } from "./cases/SpawnProps";
 import { DefaultProps } from "./cases/DefaultProps";
