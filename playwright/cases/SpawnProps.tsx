@@ -3,10 +3,10 @@ import { createTestCase } from "../create-test-case";
 import { Dialog } from "../Dialog";
 
 export const SpawnProps = createTestCase(() => {
-  const [show, Inlet] = useModal(Dialog);
+  const [show, inlet] = useModal(Dialog);
   return (
     <>
-      <Inlet />
+      {inlet}
       <button onClick={() => show({ message: "Custom message" })}>
         Open dialog
       </button>

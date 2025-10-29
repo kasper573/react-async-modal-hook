@@ -4,10 +4,10 @@ import { createTestCase } from "../create-test-case";
 import { Dialog } from "../Dialog";
 
 export const ResolveSustained = createTestCase(() => {
-  const [spawn, Inlet] = useModal(SustainDialog);
+  const [spawn, inlet] = useModal(SustainDialog);
   return (
     <>
-      <Inlet />
+      {inlet}
       <button onClick={() => spawn()}>Open dialog</button>
     </>
   );

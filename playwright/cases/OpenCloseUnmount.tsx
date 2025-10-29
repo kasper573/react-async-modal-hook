@@ -9,10 +9,10 @@ export const OpenCloseUnmount = createTestCase(() => {
 });
 
 function Page1({ gotoPage2 }: { gotoPage2: () => void }) {
-  const [show, Inlet] = useModal(Dialog);
+  const [show, inlet] = useModal(Dialog);
   return (
     <>
-      <Inlet />
+      {inlet}
       <button onClick={() => show()}>Open dialog</button>
       <button onClick={gotoPage2}>Go to page 2</button>
     </>

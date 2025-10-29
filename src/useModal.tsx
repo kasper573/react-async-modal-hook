@@ -1,25 +1,33 @@
-import type { ComponentProps, ComponentType } from "react";
-import { useCallback, useContext } from "react";
+import type { ComponentProps, ReactElement } from "react";
+import { useCallback, useContext, useEffect, useMemo } from "react";
 import { ModalContext } from "./ModalContext";
-import { ModalInlet, ModalInletInternalProps } from "./ModalInlet";
+import { ModalInlet } from "./ModalInlet";
 import { AnyModalComponent, ModalProps, ModalResolution } from "./ModalStore";
 
 export function useModal<Component extends AnyModalComponent>(
   component: Component,
+  defaultProps?: Partial<ComponentProps<Component>>,
 ): UseModalReturn<Component> {
   const store = useContext(ModalContext);
-  const spawn = useCallback(
-    (props?: ExcessModalProps<Component>) =>
-      store.spawn<ModalResolution<Component>>(component, props),
-    [store],
-  );
-  const Inlet = useCallback(
-    (props: ExcessModalProps<Component>) => (
-      <ModalInlet component={component as AnyModalComponent} {...props} />
-    ),
-    [component],
-  );
-  return [spawn, Inlet];
+
+  // We create a copy of the component to get a unique identity for the modal store.
+  // This ensures that we handle the edge case of the same component being used
+  // in multiple useModal calls correctly. Without this, each inlet of the duplicate
+  // useModal calls would render duplicate modal instances. By making the component
+  // unique, each inlet will only render the instances spawned by its own useModal call.
+  const uniqueComponent = useMemo(() => copyComponent(component), [component]);
+
+  useEffect(() => () => store.unmount(uniqueComponent), []);
+
+  return [
+    useCallback((props) => store.spawn(uniqueComponent, props), [store]),
+    <ModalInlet component={uniqueComponent} defaultProps={defaultProps} />,
+  ];
+}
+
+function copyComponent<T extends AnyModalComponent>(Component: T): T {
+  const copy = (props: ComponentProps<T>) => <Component {...(props as any)} />;
+  return copy as T;
 }
 
 /**
@@ -33,12 +41,12 @@ export type ModalSpawner<Component extends AnyModalComponent> = (
 export type UseModalReturn<Component extends AnyModalComponent> = [
   spawn: ModalSpawner<Component>,
   /**
-   * A `ModalInlet` preconfigured with the given modal component.
+   * A `ModalInlet` element preconfigured with the modal component and default props passed to `useModal`.
    */
-  Inlet: ComponentType<ExcessModalProps<Component>>,
+  inlet: ReactElement<{}>,
 ];
 
 export type ExcessModalProps<Component extends AnyModalComponent> = Omit<
   ComponentProps<Component>,
-  keyof ModalInletInternalProps<AnyModalComponent> | keyof ModalProps<unknown>
+  keyof ModalProps<unknown>
 >;

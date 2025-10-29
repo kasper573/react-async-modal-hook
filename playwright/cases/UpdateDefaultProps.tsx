@@ -4,11 +4,11 @@ import { createTestCase } from "../create-test-case";
 import { Dialog } from "../Dialog";
 
 export const UpdateDefaultProps = createTestCase(() => {
-  const [show, Inlet] = useModal(Dialog);
   const [message, setMessage] = useState("Default message");
+  const [show, inlet] = useModal(Dialog, { message });
   return (
     <>
-      <Inlet message={message} />
+      {inlet}
       <button onClick={() => show()}>Open dialog</button>
       <button onClick={() => setMessage("Custom message")}>
         Update message

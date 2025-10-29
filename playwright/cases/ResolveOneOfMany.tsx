@@ -3,10 +3,10 @@ import { createTestCase } from "../create-test-case";
 import { Dialog } from "../Dialog";
 
 export const ResolveOneOfMany = createTestCase(() => {
-  const [spawn, Inlet] = useModal(Dialog);
+  const [spawn, inlet] = useModal(Dialog);
   return (
     <>
-      <Inlet />
+      {inlet}
       <button
         onClick={() =>
           spawn({

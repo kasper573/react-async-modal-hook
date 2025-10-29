@@ -1,20 +1,12 @@
-import {
-  ComponentProps,
-  useContext,
-  useEffect,
-  useSyncExternalStore,
-} from "react";
-import { AnyModalComponent, ModalProps } from "./ModalStore";
+import { useContext, useSyncExternalStore } from "react";
+import { AnyModalComponent } from "./ModalStore";
 import { ModalContext } from "./ModalContext";
 import { ModalPortal } from "./ModalPortal";
 
-export interface ModalInletInternalProps<Component extends AnyModalComponent> {
+export interface ModalInletProps<Component extends AnyModalComponent> {
   component: Component;
+  defaultProps?: Partial<React.ComponentProps<Component>>;
 }
-
-export type ModalInletProps<Component extends AnyModalComponent> =
-  ModalInletInternalProps<Component> &
-    Omit<ComponentProps<Component>, keyof ModalProps<unknown>>;
 
 /**
  * The modal inlet is what puts the modal element into the react tree.
@@ -26,7 +18,7 @@ export type ModalInletProps<Component extends AnyModalComponent> =
  */
 export function ModalInlet<Component extends AnyModalComponent>({
   component: Component,
-  ...defaultProps
+  defaultProps,
 }: ModalInletProps<Component>) {
   const store = useContext(ModalContext);
   const instances = useSyncExternalStore(
@@ -34,8 +26,6 @@ export function ModalInlet<Component extends AnyModalComponent>({
     () => store.state.instances.get(Component),
     () => store.state.instances.get(Component),
   );
-
-  useEffect(() => () => store.unmount(Component), []);
 
   return (
     <ModalPortal>
@@ -54,3 +44,7 @@ export function ModalInlet<Component extends AnyModalComponent>({
     </ModalPortal>
   );
 }
+
+// export type ModalInletProps<Component extends AnyModalComponent> =
+//   ModalInletInternalProps<Component> &
+//     Omit<ComponentProps<Component>, keyof ModalProps<unknown>>;
