@@ -1,0 +1,26 @@
+{
+  "name": "@repo/storybook",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "storybook build",
+    "dev": "storybook dev -p 6006"
+  },
+  "devDependencies": {
+    "@repo/tsconfig": "workspace:*",
+    "react-async-modal-hook": "workspace:*",
+    "@emotion/react": "^11.14.0",
+    "@emotion/styled": "^11.14.1",
+    "@mui/material": "^7.3.4",
+    "@storybook/react-vite": "^10.0.1",
+    "react-is": "18.3.1",
+    "storybook": "^10.0.1",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "vite": "catalog:"
+  }
+}

@@ -17,7 +17,7 @@ const htmlReporter = [
 export default defineConfig({
   outputDir: artifactsDir,
   snapshotDir,
-  testDir: "./playwright",
+  testDir: "./src",
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -28,6 +28,7 @@ export default defineConfig({
     screenshot: "only-on-failure",
     video: "retain-on-failure",
     ctPort: 3100,
+    ctTemplateDir: "./template",
   },
   projects: [{ name: "chromium", use: devices["Desktop Chrome"] }],
 });

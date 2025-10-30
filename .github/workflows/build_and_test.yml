@@ -28,7 +28,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/composites/install/
-      - run: pnpm typecheck
       - run: pnpm build
         env:
           NODE_ENV: development

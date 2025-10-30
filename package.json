@@ -13,12 +13,10 @@
     "dist"
   ],
   "scripts": {
-    "typecheck": "tsc --noEmit",
-    "build": "tsup src/index.ts --clean --dts --format esm,cjs --out-dir dist",
-    "dev": "pnpm build --watch",
+    "build": "pnpm -r build",
+    "dev": "pnpm -r dev",
     "format": "prettier --write .",
-    "prepublishOnly": "npm run build",
-    "test": "playwright test -c playwright-ct.config.ts"
+    "test": "pnpm -r test"
   },
   "peerDependencies": {
     "immer": "^10",
@@ -26,23 +24,10 @@
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
-    "@playwright/experimental-ct-react": "^1.56.1",
-    "@testing-library/jest-dom": "6.4.2",
-    "@testing-library/react": "14.2.1",
-    "@testing-library/user-event": "14.5.2",
-    "@types/jest": "^29.5.12",
-    "@types/node": "^20",
-    "@types/react": "^18.2.61",
-    "@types/react-dom": "^18.2.61",
-    "@vitejs/plugin-react": "4.2.1",
-    "jsdom": "^24.0.0",
-    "prettier": "^3",
-    "tsup": "^8",
-    "typescript": "^5",
-    "vite": "5.2.13"
+    "prettier": "^3"
   },
   "engines": {
     "node": ">=22"
   },
-  "packageManager": "pnpm@9.0.4"
+  "packageManager": "pnpm@10.2.0"
 }

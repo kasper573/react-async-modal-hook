@@ -1,5 +1,5 @@
 import { ComponentType } from "react";
-import { ModalStore, ModalContext, ModalOutlet } from "../src";
+import { ModalStore, ModalContext, ModalOutlet } from "react-async-modal-hook";
 
 export function createTestCase(Content: ComponentType): ComponentType {
   const store = new ModalStore();

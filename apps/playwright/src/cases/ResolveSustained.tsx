@@ -1,5 +1,5 @@
 import { ComponentProps, useState } from "react";
-import { useModal, useModalSustainer } from "../../src";
+import { useModal, useModalSustainer } from "react-async-modal-hook";
 import { createTestCase } from "../create-test-case";
 import { Dialog } from "../Dialog";
 

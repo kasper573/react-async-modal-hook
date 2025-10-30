@@ -4,3 +4,5 @@ dist
 .vscode
 .playwright
 .cache
+*storybook.log
+storybook-static

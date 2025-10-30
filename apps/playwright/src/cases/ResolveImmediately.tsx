@@ -1,8 +1,8 @@
-import { useModal } from "../../src";
-import { Dialog } from "../Dialog";
+import { useModal } from "react-async-modal-hook";
 import { createTestCase } from "../create-test-case";
+import { Dialog } from "../Dialog";
 
-export const NoProps = createTestCase(() => {
+export const ResolveImmediately = createTestCase(() => {
   const [spawn, inlet] = useModal(Dialog);
   return (
     <>

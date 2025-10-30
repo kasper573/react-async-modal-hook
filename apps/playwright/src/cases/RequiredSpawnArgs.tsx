@@ -1,5 +1,5 @@
 import { ReactNode } from "react";
-import { ModalProps, useModal } from "../../src";
+import { ModalProps, useModal } from "react-async-modal-hook";
 import { createTestCase } from "../create-test-case";
 
 /**
