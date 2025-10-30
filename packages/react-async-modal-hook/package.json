@@ -3,6 +3,15 @@
   "version": "1.0.0",
   "license": "MIT",
   "type": "module",
+  "keywords": [
+    "react",
+    "modal",
+    "async",
+    "hook",
+    "typescript",
+    "portal",
+    "outlet"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/kasper573/react-async-modal-hook.git"
