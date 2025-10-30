@@ -9,7 +9,7 @@ const meta: Meta = {
 
 export default meta;
 
-export const WithSnackbar: StoryObj<typeof Snackbar> = {
+export const UseModal: StoryObj<typeof Snackbar> = {
   render(props) {
     const [show, inlet] = useModal(Snackbar, props);
     return (
