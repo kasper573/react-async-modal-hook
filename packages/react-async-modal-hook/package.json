@@ -8,9 +8,7 @@
     "modal",
     "async",
     "hook",
-    "typescript",
-    "portal",
-    "outlet"
+    "typescript"
   ],
   "repository": {
     "type": "git",
