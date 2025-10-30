@@ -1,7 +1,7 @@
 import { forwardRef, ReactElement } from "react";
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
-import MuiDialog from "@mui/material/Dialog";
 import {
+  Dialog as MuiDialog,
   DialogTitle,
   DialogContent,
   DialogContentText,
