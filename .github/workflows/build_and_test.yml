@@ -16,6 +16,7 @@ jobs:
       - uses: ./.github/workflows/composites/install/
       - name: Install playwright dependencies
         run: pnpm -F playwright exec playwright install --with-deps
+      - run: pnpm -F react-async-modal-hook build # Required for tests
       - run: pnpm test
       - uses: actions/upload-artifact@v4
         if: always()
