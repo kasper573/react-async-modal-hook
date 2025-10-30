@@ -49,7 +49,7 @@ importers:
   apps/playwright:
     devDependencies:
       '@playwright/experimental-ct-react':
-        specifier: ^1.56.1
+        specifier: 1.56.1
         version: 1.56.1(@types/node@20.14.2)(vite@5.2.13(@types/node@20.14.2))(yaml@2.4.5)
       '@repo/tsconfig':
         specifier: workspace:*

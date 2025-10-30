@@ -11,12 +11,13 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/composites/install/
 
-      - name: Install playwright dependencies
-        run: pnpm -F playwright exec playwright install --with-deps
+      # - name: Install playwright dependencies
+      #   run: pnpm -F playwright exec playwright install --with-deps
 
       - name: Build library
         run: pnpm -F react-async-modal-hook build # Required for tests
