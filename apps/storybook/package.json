@@ -7,7 +7,6 @@
     "dev": "storybook dev -p 6006"
   },
   "devDependencies": {
-    "@repo/tsconfig": "workspace:*",
     "react-async-modal-hook": "workspace:*",
     "@fontsource/roboto": "5.2.8",
     "@emotion/react": "^11.14.0",

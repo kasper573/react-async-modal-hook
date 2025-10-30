@@ -10,7 +10,8 @@
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
-    "dist"
+    "dist",
+    "tsconfig"
   ],
   "scripts": {
     "build": "tsup src/index.ts --clean --dts --format esm,cjs --out-dir dist",
@@ -23,7 +24,6 @@
     "react-dom": "catalog:"
   },
   "devDependencies": {
-    "@repo/tsconfig": "workspace:*",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "typescript": "catalog:",
