@@ -16,10 +16,16 @@ export function Dialog({ instanceId, open, resolve }: ModalProps<boolean>) {
   return (
     <MuiDialog
       open={open}
-      slots={{ transition: Transition }}
       keepMounted
+      disablePortal // Portalling already handled by react-async-modal-hook
       onClose={() => resolve(false)}
-      onTransitionEnd={open ? undefined : () => sustain.resolve()}
+      slots={{ transition: Transition }}
+      slotProps={{
+        transition: {
+          // End sustain when the closing transition ends
+          onTransitionEnd: open ? undefined : () => sustain.resolve(),
+        },
+      }}
     >
       <DialogTitle>This is an example dialog</DialogTitle>
       <DialogContent>
