@@ -312,7 +312,7 @@ import {
 } from "@mui/material";
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
 
-function MuiDialog({
+function ConfirmDialog({
   instanceId,
   open,
   resolve,
@@ -352,17 +352,15 @@ function MuiDialog({
 
 ### Custom modal outlet
 
-By default, modals render into the `<ModalOutlet />`. The outlet can be styled and positioned as needed:
+By default, modals render into the `<ModalOutlet />`. It's a div that can be styled as needed:
 
 ```tsx
-// Render modals with custom styling
 <ModalOutlet
   style={{
     position: "fixed",
-    top: 0,
-    left: 0,
+    inset: 0,
     zIndex: 9999,
-    pointerEvents: "none", // Let clicks pass through to modal content
+    pointerEvents: "none",
   }}
 />
 ```
