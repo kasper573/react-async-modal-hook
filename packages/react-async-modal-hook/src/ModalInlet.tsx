@@ -1,5 +1,5 @@
-import { useContext, useSyncExternalStore } from "react";
-import { AnyModalComponent, ModalProps } from "./ModalStore";
+import { createContext, useContext, useSyncExternalStore } from "react";
+import { AnyModalComponent, InstanceId, ModalProps } from "./ModalStore";
 import { ModalContext } from "./ModalContext";
 import { ModalPortal } from "./ModalPortal";
 
@@ -33,19 +33,23 @@ export function ModalInlet({
     <ModalPortal>
       {[...(instances?.entries() ?? [])].map(
         ([instanceId, { open, props }]) => (
-          <Component
-            key={instanceId}
-            {...defaultProps}
-            {...props}
-            instanceId={instanceId}
-            open={open}
-            resolve={(value) => store.resolve(Component, instanceId, value)}
-          />
+          <ModalInstanceContext.Provider key={instanceId} value={instanceId}>
+            <Component
+              {...defaultProps}
+              {...props}
+              open={open}
+              resolve={(value) => store.resolve(Component, instanceId, value)}
+            />
+          </ModalInstanceContext.Provider>
         ),
       )}
     </ModalPortal>
   );
 }
+
+export const ModalInstanceContext = createContext<InstanceId | undefined>(
+  undefined,
+);
 
 export type ExcessModalProps<Props extends ModalProps<any>> = Omit<
   Props,

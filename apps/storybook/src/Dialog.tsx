@@ -12,13 +12,12 @@ import {
 import { TransitionProps } from "@mui/material/transitions";
 
 export function Dialog({
-  instanceId,
   open,
   resolve,
   ...muiDialogProps
 }: ModalProps<boolean> &
   Omit<ComponentProps<typeof MuiDialog>, keyof ModalProps<unknown>>) {
-  const sustain = useModalSustainer(instanceId);
+  const sustain = useModalSustainer();
   return (
     <MuiDialog
       open={open}

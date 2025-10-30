@@ -3,13 +3,12 @@ import { Box, Drawer as MuiDrawer, Typography } from "@mui/material";
 import { ComponentProps } from "react";
 
 export function Drawer({
-  instanceId,
   open,
   resolve,
   ...muiDrawerProps
 }: ModalProps &
   Omit<ComponentProps<typeof MuiDrawer>, keyof ModalProps<unknown>>) {
-  const sustain = useModalSustainer(instanceId);
+  const sustain = useModalSustainer();
   return (
     <MuiDrawer
       open={open}

@@ -252,15 +252,13 @@ const result = await showDialog({ title: "Custom Title" });
 
 Prevent modals from unmounting until animations complete.
 
-Part of `ModalProps` is an `instanceId` property, which is a unique identifier for each modal instance. This can be used with the `useModalSustainer` hook to keep modals mounted until you explicitly call `sustainer.resolve()`.
-
 ```tsx
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
 
-function AnimatedDialog({ instanceId, open, resolve }: ModalProps<string>) {
+function AnimatedDialog({ open, resolve }: ModalProps<string>) {
   // Simply using the sustainer hook will keep all modal instances from being removed
   // until you explicitly call sustainer.resolve()
-  const sustainer = useModalSustainer(instanceId);
+  const sustainer = useModalSustainer();
 
   return (
     <div
@@ -313,7 +311,6 @@ import {
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
 
 function ConfirmDialog({
-  instanceId,
   open,
   resolve,
   title,
@@ -322,7 +319,7 @@ function ConfirmDialog({
   title: string;
   content: string;
 }) {
-  const sustainer = useModalSustainer(instanceId);
+  const sustainer = useModalSustainer();
 
   return (
     <Dialog

@@ -14,7 +14,7 @@ export const ResolveSustained = createTestCase(() => {
 });
 
 function SustainDialog(props: ComponentProps<typeof Dialog>) {
-  const sustain = useModalSustainer(props.instanceId);
+  const sustain = useModalSustainer();
   const [isReleased, setIsReleased] = useState(false);
   const isSustaining = !props.open && !isReleased;
   return (
