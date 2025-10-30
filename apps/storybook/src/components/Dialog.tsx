@@ -1,0 +1,44 @@
+import { forwardRef, ReactElement } from "react";
+import { ModalProps, useModalSustainer } from "react-async-modal-hook";
+import MuiDialog from "@mui/material/Dialog";
+import {
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
+  Button,
+  Slide,
+} from "@mui/material";
+import { TransitionProps } from "@mui/material/transitions";
+
+export function Dialog({ instanceId, open, resolve }: ModalProps<boolean>) {
+  const sustain = useModalSustainer(instanceId);
+  return (
+    <MuiDialog
+      open={open}
+      slots={{ transition: Transition }}
+      keepMounted
+      onClose={() => resolve(false)}
+      onTransitionEnd={open ? undefined : () => sustain.resolve()}
+    >
+      <DialogTitle>This is an example dialog</DialogTitle>
+      <DialogContent>
+        <DialogContentText>
+          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Distinctio
+          explicabo pariatur sint mollitia saepe quasi, molestiae aliquam
+          quaerat minus officiis itaque possimus dolore. Non vitae voluptatum
+          magni, itaque assumenda aut.
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => resolve(false)}>Close</Button>
+        <Button onClick={() => resolve(true)}>Ok</Button>
+      </DialogActions>
+    </MuiDialog>
+  );
+}
+
+const Transition = forwardRef<
+  unknown,
+  TransitionProps & { children: ReactElement }
+>((props, ref) => <Slide direction="up" ref={ref} {...props} />);

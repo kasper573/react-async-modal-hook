@@ -1,1 +1,6 @@
-{ "extends": "@repo/tsconfig/base.json" }
+{
+  "extends": "@repo/tsconfig/base.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  }
+}
