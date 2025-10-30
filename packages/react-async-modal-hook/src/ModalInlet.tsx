@@ -35,11 +35,11 @@ export function ModalInlet({
         ([instanceId, { open, props }]) => (
           <Component
             key={instanceId}
+            {...defaultProps}
+            {...props}
             instanceId={instanceId}
             open={open}
             resolve={(value) => store.resolve(Component, instanceId, value)}
-            {...defaultProps}
-            {...props}
           />
         ),
       )}
