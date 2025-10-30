@@ -1,8 +1,15 @@
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
 import { Button, IconButton, Snackbar as MuiSnackbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import { ComponentProps } from "react";
 
-export function Snackbar({ instanceId, open, resolve }: ModalProps) {
+export function Snackbar({
+  instanceId,
+  open,
+  resolve,
+  ...muiSnackbarProps
+}: ModalProps &
+  Omit<ComponentProps<typeof MuiSnackbar>, keyof ModalProps<unknown>>) {
   const sustain = useModalSustainer(instanceId);
   const close = () => resolve();
 
@@ -37,6 +44,7 @@ export function Snackbar({ instanceId, open, resolve }: ModalProps) {
             close();
         }
       }}
+      {...muiSnackbarProps}
     />
   );
 }

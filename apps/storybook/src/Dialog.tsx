@@ -1,4 +1,4 @@
-import { forwardRef, ReactElement } from "react";
+import { ComponentProps, forwardRef, ReactElement } from "react";
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
 import {
   Dialog as MuiDialog,
@@ -11,7 +11,13 @@ import {
 } from "@mui/material";
 import { TransitionProps } from "@mui/material/transitions";
 
-export function Dialog({ instanceId, open, resolve }: ModalProps<boolean>) {
+export function Dialog({
+  instanceId,
+  open,
+  resolve,
+  ...muiDialogProps
+}: ModalProps<boolean> &
+  Omit<ComponentProps<typeof MuiDialog>, keyof ModalProps<unknown>>) {
   const sustain = useModalSustainer(instanceId);
   return (
     <MuiDialog
@@ -26,6 +32,7 @@ export function Dialog({ instanceId, open, resolve }: ModalProps<boolean>) {
           onTransitionEnd: open ? undefined : () => sustain.resolve(),
         },
       }}
+      {...muiDialogProps}
     >
       <DialogTitle>This is an example dialog</DialogTitle>
       <DialogContent>

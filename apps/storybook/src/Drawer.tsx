@@ -1,7 +1,14 @@
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
 import { Box, Drawer as MuiDrawer, Typography } from "@mui/material";
+import { ComponentProps } from "react";
 
-export function Drawer({ instanceId, open, resolve }: ModalProps) {
+export function Drawer({
+  instanceId,
+  open,
+  resolve,
+  ...muiDrawerProps
+}: ModalProps &
+  Omit<ComponentProps<typeof MuiDrawer>, keyof ModalProps<unknown>>) {
   const sustain = useModalSustainer(instanceId);
   return (
     <MuiDrawer
@@ -9,6 +16,7 @@ export function Drawer({ instanceId, open, resolve }: ModalProps) {
       onClose={() => resolve()}
       onTransitionEnd={open ? undefined : () => sustain.resolve()}
       anchor="right"
+      {...muiDrawerProps}
     >
       <Box p={2} width={400}>
         <Typography variant="h5">This is an example drawer</Typography>
