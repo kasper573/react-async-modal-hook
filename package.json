@@ -1,16 +1,9 @@
 {
-  "name": "react-async-modal-hook",
-  "version": "1.0.0",
-  "license": "MIT",
+  "private": true,
   "type": "module",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/kasper573/react-async-modal-hook.git"
-  },
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
+  "workspaces": [
+    "packages/*",
+    "apps/*"
   ],
   "scripts": {
     "build": "pnpm -r build",
