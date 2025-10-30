@@ -126,7 +126,7 @@ function ItemListPage() {
 
 A modal inlet is effectively just the given modal component rendered into a react element, but with a few enhancements:
 
-1. It automatically renders the modal element into a [react portal](https://reactjs.org/docs/portals.html) targeting your `<ModalOutlet />` component (See getting started for more information on the outlet).
+1. It automatically renders the modal element into a [react portal](https://react.dev/reference/react-dom/createPortal) targeting your `<ModalOutlet />` component (See getting started for more information on the outlet).
 
 2. It automatically handles the open/close state of the modal.
 
