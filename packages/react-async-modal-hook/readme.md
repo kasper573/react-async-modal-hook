@@ -136,15 +136,21 @@ This means that the inlets should always be rendered unconditionally. They just 
 
 ### Installation
 
+[immer](https://immerjs.github.io/immer/) is a required peer dependency.
+
 ```bash
-npm install react-async-modal-hook
+npm install react-async-modal-hook immer
 # or
-yarn add react-async-modal-hook
+yarn add react-async-modal-hook immer
 # or
-pnpm add react-async-modal-hook
+pnpm add react-async-modal-hook immer
 ```
 
 ### Basic Setup
+
+0. **Prerequisites:**
+
+Enable immers [Map/Set support](https://immerjs.github.io/immer/map-set/) in your app.
 
 1. **Wrap your app with the modal provider:**
 
