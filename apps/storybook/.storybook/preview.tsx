@@ -1,5 +1,4 @@
 import type { Preview } from "@storybook/react-vite";
-import { enableMapSet } from "immer";
 import "@fontsource/roboto/300.css";
 import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
@@ -7,8 +6,6 @@ import "@fontsource/roboto/700.css";
 import { ReactNode, useMemo } from "react";
 import { CssBaseline } from "@mui/material";
 import { ModalStore, ModalContext, ModalOutlet } from "react-async-modal-hook";
-
-enableMapSet();
 
 const preview: Preview = {
   parameters: {

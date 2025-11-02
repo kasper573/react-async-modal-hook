@@ -1,4 +1,4 @@
-import { createContext, useContext, useSyncExternalStore } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { AnyModalComponent, InstanceId, ModalProps } from "./ModalStore";
 import { ModalContext } from "./ModalContext";
 import { ModalPortal } from "./ModalPortal";
@@ -19,26 +19,30 @@ export interface ModalInletProps {
  * so you should always render it unconditionally.
  */
 export function ModalInlet({
-  component: Component,
+  component: Modal,
   defaultProps,
 }: ModalInletProps) {
   const store = useContext(ModalContext);
-  const instances = useSyncExternalStore(
-    store.subscribe,
-    () => store.state.instances.get(Component),
-    () => store.state.instances.get(Component),
+
+  // Note: Can't use useSyncExternalStore here since instancesFor() always returns a new map.
+  // Making it return a stable instance is possible but would make the store way more complex for little gain.
+  // Recomputing instance maps on every store change is not particularly expensive.
+  const [instances, setInstances] = useState(() => store.instancesFor(Modal));
+  useEffect(
+    () => store.subscribe(() => setInstances(store.instancesFor(Modal))),
+    [store, Modal],
   );
 
   return (
     <ModalPortal>
-      {[...(instances?.entries() ?? [])].map(
-        ([instanceId, { open, props }]) => (
+      {[...instances.entries()].map(
+        ([instanceId, { open, propsGivenViaSpawnInvocation }]) => (
           <ModalInstanceContext.Provider key={instanceId} value={instanceId}>
-            <Component
+            <Modal
               {...defaultProps}
-              {...props}
+              {...propsGivenViaSpawnInvocation}
               open={open}
-              resolve={(value) => store.resolve(Component, instanceId, value)}
+              resolve={(value) => store.resolve(Modal, instanceId, value)}
             />
           </ModalInstanceContext.Provider>
         ),

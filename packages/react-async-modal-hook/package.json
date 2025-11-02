@@ -22,11 +22,10 @@
   ],
   "scripts": {
     "build": "tsup src/index.ts --clean --dts --format esm,cjs --out-dir dist",
-    "dev": "tsup src/index.ts --watch --dts --format esm,cjs --out-dir dist",
+    "dev": "tsup src/index.ts --watch --dts --format esm,cjs --out-dir dist --sourcemap",
     "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
-    "immer": "^10",
     "react": "catalog:",
     "react-dom": "catalog:"
   },

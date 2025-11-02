@@ -6,8 +6,8 @@ export function ModalPortal({ children }: { children?: ReactNode }) {
   const store = useContext(ModalContext);
   const outlet = useSyncExternalStore(
     store.subscribe,
-    () => store.state.outlet,
-    () => store.state.outlet,
+    store.getOutlet,
+    store.getOutlet,
   );
   if (!outlet) {
     return null;

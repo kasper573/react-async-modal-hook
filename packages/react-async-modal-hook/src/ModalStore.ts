@@ -1,6 +1,5 @@
 import { ComponentType } from "react";
 import { deferPromise, DeferredPromise } from "./deferPromise";
-import { produce } from "immer";
 
 export class ModalStore {
   private sustainers = new Map<InstanceId, Promise<void>>();
@@ -10,19 +9,24 @@ export class ModalStore {
     instances: new Map(),
   };
 
-  get state(): ModalStoreState {
-    return this.#state;
-  }
-
   subscribe = (listener: ModalStoreListener): StoreUnsubscriber => {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
   };
 
+  instancesFor(
+    component: AnyModalComponent,
+  ): ReadonlyMap<InstanceId, ModalInstance> {
+    // Returning a new instance to avoid accidental mutation of internal state.
+    // Also ensures usage with useState/useSyncExternalStore works correctly.
+    return new Map(this.#state.instances.get(component));
+  }
+
+  getOutlet = () => this.#state.outlet;
+
   setOutlet(newOutlet: HTMLElement | undefined) {
-    this.mutate((draft) => {
-      draft.outlet = newOutlet;
-    });
+    this.#state.outlet = newOutlet;
+    this.notifyListeners();
   }
 
   setSustainer(instanceId: InstanceId, promise?: Promise<void>) {
@@ -34,83 +38,75 @@ export class ModalStore {
   }
 
   unmount(component: AnyModalComponent) {
-    this.mutate((draft) => {
-      const componentInstances = draft.instances.get(component);
-      if (!componentInstances) {
-        return;
-      }
+    const componentInstances = this.#state.instances.get(component);
+    if (!componentInstances) {
+      return;
+    }
 
-      for (const { deferredPromise } of componentInstances.values()) {
-        if (!deferredPromise.isResolved) {
-          deferredPromise.reject(
-            new Error("Modal unmounted before resolution"),
-          );
-        }
+    for (const { deferredPromise } of componentInstances.values()) {
+      if (!deferredPromise.isResolved) {
+        deferredPromise.reject(new Error("Modal unmounted before resolution"));
       }
+    }
 
-      draft.instances.delete(component);
-    });
+    this.#state.instances.delete(component);
+    this.notifyListeners();
   }
 
   private async removeInstance(
     component: AnyModalComponent,
     instanceId: InstanceId,
   ) {
-    this.mutate((draft) => {
-      const instance = draft.instances.get(component)?.get(instanceId);
-      if (instance) {
-        instance.open = false;
-      }
-    });
+    const instance = this.#state.instances.get(component)?.get(instanceId);
+    if (instance) {
+      instance.open = false;
+      this.notifyListeners();
+    }
 
     await this.sustainers.get(instanceId);
 
-    this.mutate((draft) => {
-      draft.instances.get(component)?.delete(instanceId);
-    });
+    this.#state.instances.get(component)?.delete(instanceId);
+    this.notifyListeners();
   }
 
   async spawn<Resolution>(
     component: AnyModalComponent,
-    props: ModalInstance["props"] = {},
+    props: ModalInstance["propsGivenViaSpawnInvocation"] = {},
   ): Promise<Resolution> {
     const instanceId = this.nextId();
 
-    const promise = this.mutate((draft) => {
-      let componentInstances = draft.instances.get(component);
-      if (!componentInstances) {
-        componentInstances = new Map();
-        draft.instances.set(component, componentInstances);
-      }
+    let componentInstances = this.#state.instances.get(component);
+    if (!componentInstances) {
+      componentInstances = new Map();
+      this.#state.instances.set(component, componentInstances);
+    }
 
-      const deferredPromise = deferPromise((promise) =>
-        promise.then(async (resolution) => {
-          await this.removeInstance(component, instanceId);
-          return resolution;
-        }),
-      );
+    const deferredPromise = deferPromise((promise) =>
+      promise.then(async (resolution) => {
+        await this.removeInstance(component, instanceId);
+        return resolution;
+      }),
+    );
 
-      componentInstances.set(instanceId, {
-        open: false,
-        deferredPromise,
-        props,
-      });
-
-      return deferredPromise.promise as Promise<Resolution>;
+    componentInstances.set(instanceId, {
+      open: false,
+      deferredPromise,
+      propsGivenViaSpawnInvocation: props,
     });
+
+    this.notifyListeners();
 
     // Wait to let the instance render as closed first.
     // This makes it drastically easier to do enter animations in css.
     await nextTick();
 
-    this.mutate((draft) => {
-      const instance = draft.instances.get(component)?.get(instanceId);
-      if (instance) {
-        instance.open = true;
-      }
-    });
+    const instance = this.#state.instances.get(component)?.get(instanceId);
+    if (instance) {
+      instance.open = true;
+      this.notifyListeners();
+    }
 
-    return promise;
+    return deferredPromise.promise as Promise<Resolution>;
   }
 
   resolve<Resolution>(
@@ -118,23 +114,16 @@ export class ModalStore {
     instanceId: InstanceId,
     value: Resolution,
   ): void {
-    this.mutate((draft) => {
-      const instance = draft.instances.get(component)?.get(instanceId);
-      if (instance && !instance.deferredPromise.isResolved) {
-        instance.deferredPromise.resolve(value);
-      }
-    });
+    const instance = this.#state.instances.get(component)?.get(instanceId);
+    if (instance && !instance.deferredPromise.isResolved) {
+      instance.deferredPromise.resolve(value);
+    }
   }
 
-  private mutate<Return>(mutateFn: (state: ModalStoreState) => Return): Return {
-    let ret: Return;
-    this.#state = produce(this.#state, (draft) => {
-      ret = mutateFn(draft);
-    });
+  private notifyListeners() {
     for (const listener of this.listeners) {
-      listener(this.#state);
+      listener();
     }
-    return ret!;
   }
 
   private _idCounter = 0;
@@ -151,7 +140,7 @@ export interface ModalStoreState {
 
 export interface ModalInstance {
   open: boolean;
-  props: Record<string, unknown>;
+  readonly propsGivenViaSpawnInvocation: Readonly<Record<string, unknown>>;
   readonly deferredPromise: DeferredPromise<unknown>;
 }
 
@@ -159,7 +148,7 @@ export type InstanceId = string;
 
 export type StoreUnsubscriber = () => void;
 
-export type ModalStoreListener = (state: ModalStoreState) => void;
+export type ModalStoreListener = () => void;
 
 export type AnyModalComponent = ComponentType<ModalProps<any>>;
 

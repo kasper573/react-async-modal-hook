@@ -128,29 +128,23 @@ A modal inlet is effectively just the given modal component rendered into a reac
 
 1. It automatically renders the modal element into a [react portal](https://react.dev/reference/react-dom/createPortal) targeting your `<ModalOutlet />` component (See getting started for more information on the outlet).
 
-2. It automatically handles the open/close state of the modal.
+2. It automatically handles the open/close state of the modal. This means you should not render the inlet conditionally, since that is handled internally.
 
-This means that the inlets should always be rendered unconditionally. They just need to be part of your component tree at the same place as you used `useModal` to ensure they have access to the same react context.
+3. It provides the `resolve` function to the modal component, which allows the modal to close itself and return a value.
 
 ## Getting Started
 
 ### Installation
 
-[immer](https://immerjs.github.io/immer/) is a required peer dependency.
-
 ```bash
-npm install react-async-modal-hook immer
+npm install react-async-modal-hook
 # or
-yarn add react-async-modal-hook immer
+yarn add react-async-modal-hook
 # or
-pnpm add react-async-modal-hook immer
+pnpm add react-async-modal-hook
 ```
 
 ### Basic Setup
-
-0. **Prerequisites:**
-
-Enable immers [Map/Set support](https://immerjs.github.io/immer/map-set/) in your app.
 
 1. **Wrap your app with the modal provider:**
 
