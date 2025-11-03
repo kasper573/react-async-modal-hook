@@ -1,5 +1,5 @@
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
-import { Button, IconButton, Snackbar as MuiSnackbar } from "@mui/material";
+import { IconButton, Snackbar as MuiSnackbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { ComponentProps } from "react";
 
@@ -12,29 +12,22 @@ export function Snackbar({
   const sustain = useModalSustainer();
   const close = () => resolve();
 
-  const action = (
-    <>
-      <Button color="secondary" size="small" onClick={close}>
-        UNDO
-      </Button>
-      <IconButton
-        size="small"
-        aria-label="close"
-        color="inherit"
-        onClick={close}
-      >
-        <CloseIcon fontSize="small" />
-      </IconButton>
-    </>
-  );
-
   return (
     <MuiSnackbar
       open={open}
       autoHideDuration={6000}
       onTransitionEnd={open ? undefined : () => sustain.resolve()}
       message="Note archived"
-      action={action}
+      action={
+        <IconButton
+          size="small"
+          aria-label="close"
+          color="inherit"
+          onClick={close}
+        >
+          <CloseIcon fontSize="small" />
+        </IconButton>
+      }
       onClose={(_, reason) => {
         switch (reason) {
           case "clickaway":

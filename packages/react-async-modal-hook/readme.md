@@ -2,87 +2,32 @@
 
 The declarative nature of React is great for most use cases, but not always. When working with async UI flows like dialogs, toasts and drawers, it's often preferable to have a promise based interface, which is what this library provides.
 
-## Motivation
+## Quickstart
 
-Traditional modal management in React is verbose and error-prone. Let's look at a real-world example of what implementing a confirmation dialog typically looks like:
+> For more detailed information, see full documentation below.
 
-### The traditional approach
-
-Here's an example of a page that allows users to add items to a list. If the user tries to add a duplicate item, we want to show a confirmation dialog before proceeding.
+Here's an example of a component that allows the user to display and add list items. Adding new items is done via a dialog, and if the user tries to add a duplicate item, we want to show a confirmation dialog before proceeding.
 
 ```tsx
-function ItemListPage() {
+import { useModal } from "react-async-modal-hook";
+import { CreateItemDialog } from "./CreateItemDialog";
+import { ConfirmDialog } from "./ConfirmDialog";
+
+function ItemList() {
   const [items, setItems] = useState([]);
-  const [isAddOpen, setAddOpen] = useState(false);
-  const [pendingItem, setPendingItem] = useState(null);
-  const [isConfirmOpen, setConfirmOpen] = useState(false);
 
-  function handleAddOpen() {
-    setAddOpen(true);
-  }
-
-  function handleAddClosed(newItem) {
-    setAddOpen(false);
-
-    if (items.includes(newItem)) {
-      setConfirmOpen(true);
-      setPendingItem(newItem);
-    } else {
-      setItems([...items, newItem]);
-    }
-  }
-
-  function handleConfirmClose(confirmed) {
-    setConfirmOpen(false);
-
-    if (confirmed && pendingItem) {
-      setItems([...items, pendingItem]);
-    }
-    setPendingItem(null);
-  }
-
-  return (
-    <>
-      <ul>
-        {items.map((item, index) => (
-          <li key={index}>{item}</li>
-        ))}
-      </ul>
-
-      <button onClick={handleAddOpen}>Add item</button>
-
-      <AddDialog open={isAddOpen} onClose={handleAddClosed} />
-
-      <ConfirmDialog
-        open={isConfirmOpen}
-        title="This item has already been added"
-        message={`Are you sure you want to add a duplicate of "${pendingItem}"?`}
-        onClose={handleConfirmClose}
-      />
-    </>
-  );
-}
-```
-
-**Problems with this approach:**
-
-- **Verbose**: It's a lot of boilerplate code to write
-- **Complex state management**: Each modal often requires open/result states, which becomes really hard to reason about as the number of modals grows
-- **Fragmented logical flow**: The flow is hard to follow across multiple event handlers
-- **Performance issues**: Parent component re-renders on every modal state change
-
-### The react-async-modal-hook approach
-
-With `react-async-modal-hook`, we can simplify the above example significantly:
-
-```tsx
-function ItemListPage() {
-  const [items, setItems] = useState([]);
-  const [add, addInlet] = useModal(AddDialog);
+  // useModal is a hook that returns the two key features of this library:
+  // 1. A spawner function that opens a new instance of the given modal.
+  //    It returns a promise that resolves when the modal closes, along with its result.
+  // 2. The inlet: A react element that renders the spawned elements for the given component.
   const [confirm, confirmInlet] = useModal(ConfirmDialog);
+  const [createItem, createInlet] = useModal(CreateItemDialog);
 
-  async function handleAdd() {
-    const newItem = await add();
+  async function onAddClicked() {
+    // Calling `createItem` will display the `CreateItemDialog` modal and return a promise.
+    // This promise waits for the dialog to close and returns the new item.
+    // (See the modal component example below for how promise resolution works)
+    const newItem = await createItem();
 
     if (items.includes(newItem)) {
       const confirmed = await confirm({
@@ -100,8 +45,8 @@ function ItemListPage() {
 
   return (
     <>
-      {/* What is an inlet? See the next section in the docs. */}
-      {addInlet}
+      {/* All modal inlets must be added to the react tree */}
+      {createInlet}
       {confirmInlet}
 
       <ul>
@@ -110,67 +55,13 @@ function ItemListPage() {
         ))}
       </ul>
 
-      <button onClick={handleAdd}>Add item</button>
+      <button onClick={onAddClicked}>Add item</button>
     </>
   );
 }
 ```
 
-**Benefits:**
-
-- **Minimal boilerplate**: One line per modal setup
-- **Linear logic flow**: Handle modal results directly in sequence and compose complex flows easily
-- **Performance**: Modal state changes re-render modals without re-rendering the parent component
-
-### What is a modal inlet?
-
-A modal inlet is effectively just the given modal component rendered into a react element, but with a few enhancements:
-
-1. It automatically renders the modal element into a [react portal](https://react.dev/reference/react-dom/createPortal) targeting your `<ModalOutlet />` component (See getting started for more information on the outlet).
-
-2. It automatically handles the open/close state of the modal. This means you should not render the inlet conditionally, since that is handled internally.
-
-3. It provides the `resolve` function to the modal component, which allows the modal to close itself and return a value.
-
-## Getting Started
-
-### Installation
-
-```bash
-npm install react-async-modal-hook
-# or
-yarn add react-async-modal-hook
-# or
-pnpm add react-async-modal-hook
-```
-
-### Basic Setup
-
-1. **Wrap your app with the modal provider:**
-
-```tsx
-import { useMemo } from "react";
-import { ModalStore, ModalContext, ModalOutlet } from "react-async-modal-hook";
-
-function App() {
-  const modalStore = useMemo(() => new ModalStore(), []);
-
-  return (
-    <ModalContext.Provider value={modalStore}>
-      <YourAppContent />
-      {/* 
-        The modal outlet is a react portal destination where all modals will be sent.
-        This allows you to control the draw order of all modals.
-      */}
-      <ModalOutlet />
-    </ModalContext.Provider>
-  );
-}
-```
-
-2. **Create a modal component:**
-
-Any react component that accepts `ModalProps<T>` can be used as a modal.
+Any react component that accepts `ModalProps<T>` can be used with `useModal`.
 
 The component is expected to follow the convention of making use of the `open` prop to control visibility, and calling the `resolve` function when the modal should be closed.
 
@@ -184,7 +75,7 @@ interface ConfirmDialogProps extends ModalProps<boolean> {
   message: string;
 }
 
-function ConfirmDialog({ title, message, open, resolve }: ConfirmDialogProps) {
+export function ConfirmDialog({ title, message, open, resolve }: ConfirmDialogProps) {
   return (
     <dialog open={open}>
       <h2>{title}</h2>
@@ -196,44 +87,71 @@ function ConfirmDialog({ title, message, open, resolve }: ConfirmDialogProps) {
 }
 ```
 
-3. **Use the modal in your components:**
+> Only showcasing one of the components from the above example here for brevity, as the other component would be nearly identical.
+
+**Benefits:**
+
+- **Minimal boilerplate**: Only write the code that matters. The rest is handled internally.
+- **Linear logic flow**: Spawn and await modal results in easy to read and compose async/await flow.
+- **Performance**: Modal state changes re-render modals without re-rendering the parent component
+
+## Setup
+
+1. Install the package
+
+```bash
+npm install react-async-modal-hook
+# or
+yarn add react-async-modal-hook
+# or
+pnpm add react-async-modal-hook
+```
+
+2. Add `ModalStore` and `ModalOutlet` to your app
+
+The store contains the state of all modals in your app.
+
+The outlet is a react portal destination where all modals will be sent. It allows you to control the draw order of all modals, which is a great way to avoid having to resort to z-index hacks.
 
 ```tsx
-import { useModal } from "react-async-modal-hook";
+import { useMemo } from "react";
+import { ModalStore, ModalContext, ModalOutlet } from "react-async-modal-hook";
 
-function MyComponent() {
-  const [showConfirm, confirmInlet] = useModal(ConfirmDialog);
-
-  async function handleAction() {
-    // `showConfirm` returns a promise that resolves with the value `T` in ModalProps<T>.
-    const confirmed = await showConfirm({
-      title: "Confirm Action",
-      message: "Are you sure you want to proceed?",
-    });
-
-    if (confirmed) {
-      // User clicked "Yes"
-      console.log("Action confirmed!");
-    } else {
-      // User clicked "No"
-      console.log("Action cancelled");
-    }
-  }
+function App() {
+  const modalStore = useMemo(() => new ModalStore(), []);
 
   return (
-    <>
-      {confirmInlet}
-      <button onClick={handleAction}>Perform Action</button>
-    </>
+    <ModalContext.Provider value={modalStore}>
+      <YourAppContent />
+      <ModalOutlet />
+    </ModalContext.Provider>
   );
 }
 ```
 
-## Advanced features
+> You can [customize the modal outlet](#custom-modal-outlet) if necessary.
 
-### Default props
+## What are these `inlets` in the example above?
 
-Reduce repetition by providing default props to your modals:
+I call them inlets because they are the counterpart to the outlet you set up.
+
+They are react elements that renders all currently spawned modal instances for its associated modal component.
+
+1. It automatically renders into a [react portal](https://react.dev/reference/react-dom/createPortal) targeting your [ModalOutlet](#1-set-up-modal-store-and-outlet) component
+
+2. It automatically handles the open/close state of the modal.
+
+3. It provides the `resolve` function to the modal component, which allows the modal to close itself and return a value.
+
+Inlets should always be part of the react tree. Do not render them conditionally for visibility, or wrap with more react portals, since that is already handled internally.
+
+Note that since inlets automatically portal to the outlet, it never actually renders anything inline, so you do not have to worry about it impacting the dom where you place them.
+
+> An optional note on implementation for the extra curious: It may seem like it should be possible to automate the rendering of modal elements without this inlet pattern, and thus reducing boilerplate even futher. Unfortunately that can't be done without losing access to react context. Previous versions of this library tried this approach and found this out the hard way, so the inlet pattern is a minor verbosity ultimately imposed by react itself that we simply cannot avoid if we want modals to have access to context, which we definitely do. The reduction in boilerplate is not worth the loss of access to react context.
+
+## Default props
+
+Props passed to all spawned instances can be provided by using the second argument to `useModal`:
 
 ```tsx
 const [showDialog, dialogInlet] = useModal(MyDialog, {
@@ -246,11 +164,43 @@ const result = await showDialog({ title: "Custom Title" });
 // Will yield this modal: <MyDialog theme="dark" size="large" title="Custom Title" />
 ```
 
-> Note that if you provide default props for properties that are required by the modal component, the librarys typescript definitions will adjust and allow you to omit them in the spawner function.
+### TypeScript benefits
 
-### Animation support with useModalSustainer
+For Typescript users: If you provide default props for properties that are required by the modal component, the librarys typescript definitions will adjust and allow you to omit them in the spawner function.
 
-Prevent modals from unmounting until animations complete.
+```tsx
+// Lets say you have a modal component for the following props:
+// (Modal implementation not shown for brevity)
+interface MyDialogProps extends ModalProps<string> {
+  title: string;
+}
+
+// It's perfectly fine to omit default props, even if some props are required:
+const [show, inlet1] = useModal(MyDialog);
+
+// But then when you spawn a new instance, you must provide all required props:
+await show({ title: "Hello" }); // OK
+await show({}); // TypeScript error: Property 'title' is missing
+await show(); // TypeScript error: Expected 1 arguments, but got 0.
+
+// However, if you provide default props for all required properties:
+const [showWithDefaults, inlet2] = useModal(MyDialog, {
+  title: "Default Title",
+});
+
+// Now you can omit them when spawning new instances:
+await showWithDefaults({}); // OK
+await showWithDefaults(); // OK
+
+// But of course you can still override the defaults if needed:
+await showWithDefaults({ title: "Custom Title" }); // OK
+```
+
+## Animation support with useModalSustainer
+
+By default, modal elements are unmounted as soon as they are resolved. This works fine as long as your modals do not have any exit animations. If you want to add exit animations, you can use the `useModalSustainer` hook inside your modal component to communicate to the library that it should wait to unmount modal elements of this component until you explicitly tell it to do so.
+
+This allows you to integrate with any animation library of your choice, or even just use CSS animations.
 
 ```tsx
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
@@ -263,12 +213,8 @@ function AnimatedDialog({ open, resolve }: ModalProps<string>) {
   return (
     <div
       className={`dialog ${open ? "entering" : "exiting"}`}
-      onAnimationEnd={() => {
-        // Only resolve sustainer when closing animation completes
-        if (!open) {
-          sustainer.resolve();
-        }
-      }}
+      // We only want to resolve the sustainer when the "close" animation ends
+      onAnimationEnd={open ? undefined : () => sustainer.resolve()}
     >
       <h2>Animated Dialog</h2>
       <button onClick={() => resolve("done")}>Close</button>
@@ -277,7 +223,7 @@ function AnimatedDialog({ open, resolve }: ModalProps<string>) {
 }
 ```
 
-### Multiple modal instances
+## Multiple modal instances
 
 The same modal component can have multiple instances open simultaneously:
 
@@ -296,9 +242,9 @@ async function handleMultipleNotifications() {
 }
 ```
 
-### Integration with UI libraries
+## Integration with UI component libraries
 
-Works seamlessly with Material-UI, Chakra UI, Ant Design, etc:
+The library interface is really small and should work seamlessly with any popular UI component library. Here's an example for integrating with a [material-ui dialog component](https://mui.com/material-ui/react-dialog/).
 
 ```tsx
 import {
@@ -347,7 +293,9 @@ function ConfirmDialog({
 }
 ```
 
-### Custom modal outlet
+For more examples you can check out the [storybook app included in the repository](https://github.com/kasper573/react-async-modal-hook/tree/main/apps/storybook/src)
+
+## Custom modal outlet
 
 By default, modals render into the `<ModalOutlet />`. It's a div that can be styled as needed:
 
