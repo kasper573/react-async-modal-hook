@@ -112,7 +112,7 @@ pnpm add react-async-modal-hook
 
 The store contains the state of all modals in your app.
 
-The outlet is a react portal destination where all modals will be sent. It allows you to control the draw order of all modals, which is a great way to avoid having to resort to z-index hacks.
+The outlet is a react portal destination where all modals will be sent. It allows you to control the draw order of all modals, which is a great way to avoid having to resort to using z-index.
 
 ```tsx
 import { useMemo } from "react";
@@ -300,27 +300,25 @@ For more examples you can check out the [storybook app included in the repositor
 
 ## Custom modal outlet
 
-By default, modals render into the `<ModalOutlet />`. It's a div that can be styled as needed:
+By default modals render into the `<ModalOutlet />`. It is just an unstyled div, so you can easily customize it by passing props:
 
 ```tsx
 <ModalOutlet
-  style={{
-    position: "fixed",
-    inset: 0,
-    zIndex: 9999,
-    pointerEvents: "none",
-  }}
+  id="your-id-here"
+  className="your-class-here"
+  style={yourInlineStylesHere}
+  // ...etc
 />
 ```
 
-But if you need more control, you can set any dom element as the react portal target by assigning it to the `ModalStore`:
+If you're integrating with something outside react, you can set any dom element as the react portal target by assigning it to the `ModalStore`:
 
 ```tsx
 const modalStore = new ModalStore();
 modalStore.setOutlet(document.getElementById("custom-modal-root"));
 ```
 
-> In fact, the `ModalOutlet` component is just a simple div component that assigns its ref as the outlet on the `ModalStore` when mounted.
+> In fact, the `ModalOutlet` component is just a simple div component that assigns its ref as the outlet on the `ModalStore` when mounted, which of course is another approach you could use.
 
 ## Nested `useModal` calls
 
