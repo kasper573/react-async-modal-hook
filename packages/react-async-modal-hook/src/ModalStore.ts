@@ -3,15 +3,14 @@ import type { DeferredPromise } from "./deferPromise";
 import { deferPromise } from "./deferPromise";
 
 export class ModalStore {
-  private listeners = new Set<ModalStoreListener>();
-
+  #listeners = new Set<ModalStoreListener>();
   #state: ModalStoreState = {
     instances: new Map(),
   };
 
   subscribe = (listener: ModalStoreListener): StoreUnsubscriber => {
-    this.listeners.add(listener);
-    return () => this.listeners.delete(listener);
+    this.#listeners.add(listener);
+    return () => this.#listeners.delete(listener);
   };
 
   instancesFor(
@@ -151,18 +150,24 @@ export class ModalStore {
   }
 
   private notifyListeners() {
-    for (const listener of this.listeners) {
+    for (const listener of this.#listeners) {
       listener();
     }
   }
 
   private _idCounter = 0;
 
-  nextId(): InstanceId {
+  private nextId(): InstanceId {
     return (this._idCounter++).toString();
   }
 }
 
+/**
+ * You are not supposed to be mutating this state outside of ModalStore.
+ * Doing so may lead to unexpected behavior.
+ *
+ * @internal
+ */
 export interface ModalStoreState {
   readonly instances: Map<AnyModalComponent, Map<InstanceId, ModalInstance>>;
   outlet?: HTMLElement;
