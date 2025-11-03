@@ -2,6 +2,13 @@
 
 The declarative nature of React is great for most use cases, but not always. When working with async UI flows like dialogs, toasts and drawers, it's often preferable to have a promise based interface, which is what this library provides.
 
+**Highlights:**
+
+- **Minimal boilerplate**: Only write the code that matters. The rest is handled internally.
+- **Linear logic flow**: Spawn and await modal results in easy to read and compose async/await flow.
+- **Performance**: Modal state changes re-render modals without re-rendering the parent component
+- **Tiny**: ~1kB gzipped and minified, zero dependencies.
+
 ## Quickstart
 
 > For more detailed information, see full documentation below.
@@ -88,12 +95,6 @@ export function ConfirmDialog({ title, message, open, resolve }: ConfirmDialogPr
 ```
 
 > Only showcasing one of the components from the above example here for brevity, as the other component would be nearly identical.
-
-**Benefits:**
-
-- **Minimal boilerplate**: Only write the code that matters. The rest is handled internally.
-- **Linear logic flow**: Spawn and await modal results in easy to read and compose async/await flow.
-- **Performance**: Modal state changes re-render modals without re-rendering the parent component
 
 ## Setup
 
