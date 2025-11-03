@@ -12,10 +12,14 @@ export default meta;
 export const UseModal: StoryObj<typeof Dialog> = {
   render(props) {
     const [show, inlet] = useModal(Dialog, props);
+    async function showAndReportResult() {
+      const result = await show();
+      alert(result ? "Ok clicked" : "Close clicked");
+    }
     return (
       <>
         {inlet}
-        <Button onClick={() => show()}>Open dialog</Button>
+        <Button onClick={showAndReportResult}>Open dialog</Button>
       </>
     );
   },

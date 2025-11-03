@@ -1,4 +1,4 @@
-import type { ComponentProps, ReactElement } from "react";
+import type { ComponentProps, ReactElement, ReactNode } from "react";
 import { forwardRef } from "react";
 import type { ModalProps } from "react-async-modal-hook";
 import { useModalSustainer } from "react-async-modal-hook";
@@ -13,12 +13,23 @@ import {
 } from "@mui/material";
 import type { TransitionProps } from "@mui/material/transitions";
 
+interface DialogProps
+  extends ModalProps<boolean>,
+    Omit<
+      ComponentProps<typeof MuiDialog>,
+      keyof ModalProps<unknown> | "title"
+    > {
+  title?: ReactNode;
+  message?: ReactNode;
+}
+
 export function Dialog({
   open,
   resolve,
+  title = "This is an example dialog",
+  message = "Lorem ipsum dolor sit, amet consectetur adipisicing elit.",
   ...muiDialogProps
-}: ModalProps<boolean> &
-  Omit<ComponentProps<typeof MuiDialog>, keyof ModalProps<unknown>>) {
+}: DialogProps) {
   const sustain = useModalSustainer();
   return (
     <MuiDialog
@@ -35,14 +46,9 @@ export function Dialog({
       }}
       {...muiDialogProps}
     >
-      <DialogTitle>This is an example dialog</DialogTitle>
+      <DialogTitle>{title}</DialogTitle>
       <DialogContent>
-        <DialogContentText>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Distinctio
-          explicabo pariatur sint mollitia saepe quasi, molestiae aliquam
-          quaerat minus officiis itaque possimus dolore. Non vitae voluptatum
-          magni, itaque assumenda aut.
-        </DialogContentText>
+        <DialogContentText>{message}</DialogContentText>
       </DialogContent>
       <DialogActions>
         <Button onClick={() => resolve(false)}>Close</Button>

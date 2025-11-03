@@ -6,6 +6,17 @@ import type { ComponentProps } from "react";
 export function Drawer({
   open,
   resolve,
+  children = (
+    <>
+      <Typography variant="h5">This is an example drawer</Typography>
+      <Typography>
+        Lorem ipsum dolor sit, amet consectetur adipisicing elit. Distinctio
+        explicabo pariatur sint mollitia saepe quasi, molestiae aliquam quaerat
+        minus officiis itaque possimus dolore. Non vitae voluptatum magni,
+        itaque assumenda aut.
+      </Typography>
+    </>
+  ),
   ...muiDrawerProps
 }: ModalProps &
   Omit<ComponentProps<typeof MuiDrawer>, keyof ModalProps<unknown>>) {
@@ -20,13 +31,7 @@ export function Drawer({
       {...muiDrawerProps}
     >
       <Box p={2} width={400}>
-        <Typography variant="h5">This is an example drawer</Typography>
-        <Typography>
-          Lorem ipsum dolor sit, amet consectetur adipisicing elit. Distinctio
-          explicabo pariatur sint mollitia saepe quasi, molestiae aliquam
-          quaerat minus officiis itaque possimus dolore. Non vitae voluptatum
-          magni, itaque assumenda aut.
-        </Typography>
+        {children}
       </Box>
     </MuiDrawer>
   );

@@ -7,6 +7,7 @@ import type { ComponentProps } from "react";
 export function Snackbar({
   open,
   resolve,
+  message = "Notification!",
   ...muiSnackbarProps
 }: ModalProps &
   Omit<ComponentProps<typeof MuiSnackbar>, keyof ModalProps<unknown>>) {
@@ -16,9 +17,8 @@ export function Snackbar({
   return (
     <MuiSnackbar
       open={open}
-      autoHideDuration={6000}
       onTransitionEnd={open ? undefined : () => sustain.resolve()}
-      message="Note archived"
+      message={message}
       action={
         <IconButton
           size="small"
@@ -29,6 +29,7 @@ export function Snackbar({
           <CloseIcon fontSize="small" />
         </IconButton>
       }
+      {...muiSnackbarProps}
       onClose={(_, reason) => {
         switch (reason) {
           case "clickaway":
@@ -37,7 +38,6 @@ export function Snackbar({
             close();
         }
       }}
-      {...muiSnackbarProps}
     />
   );
 }
