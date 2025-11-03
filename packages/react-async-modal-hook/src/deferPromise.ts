@@ -24,8 +24,8 @@ export function deferPromise<T>(
       // oxlint-disable-next-line no-non-null-assertion - We know reject is assigned
       reject!(reason);
     },
-    get isResolved() {
-      return status === "resolved";
+    get isPending() {
+      return status === "pending";
     },
   };
 }
@@ -34,5 +34,5 @@ export interface DeferredPromise<T> {
   readonly promise: Promise<T>;
   readonly resolve: (value: T) => void;
   readonly reject: (reason?: unknown) => void;
-  readonly isResolved: boolean;
+  readonly isPending: boolean;
 }

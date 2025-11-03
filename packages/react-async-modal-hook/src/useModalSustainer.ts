@@ -23,9 +23,9 @@ export function useModalSustainer(): DeferredPromise<void> {
       return;
     }
 
-    store.setSustainer(instanceId, sustainer.promise);
+    store.setSustainer(instanceId, sustainer);
     return () => store.setSustainer(instanceId, undefined);
-  }, [store, instanceId, sustainer.promise]);
+  }, [store, instanceId, sustainer]);
 
   return sustainer;
 }

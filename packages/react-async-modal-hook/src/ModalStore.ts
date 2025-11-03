@@ -3,7 +3,6 @@ import type { DeferredPromise } from "./deferPromise";
 import { deferPromise } from "./deferPromise";
 
 export class ModalStore {
-  private sustainers = new Map<InstanceId, Promise<void>>();
   private listeners = new Set<ModalStoreListener>();
 
   #state: ModalStoreState = {
@@ -30,12 +29,37 @@ export class ModalStore {
     this.notifyListeners();
   }
 
-  setSustainer(instanceId: InstanceId, promise?: Promise<void>) {
-    if (promise) {
-      this.sustainers.set(instanceId, promise);
-    } else {
-      this.sustainers.delete(instanceId);
+  setSustainer(instanceId: InstanceId, sustainer?: DeferredPromise<void>) {
+    let instance: ModalInstance | undefined;
+    for (const instancesMap of this.#state.instances.values()) {
+      instance = instancesMap.get(instanceId);
+      if (instance) {
+        break;
+      }
     }
+
+    // Ignore irrelevant changes
+    if (!instance || sustainer === instance.sustainer) {
+      return;
+    }
+
+    // Graceful error handling for unmount edge cases.
+    // ie. when forgetting to resolve a sustainer before unmount
+    // Note that the replace error should be practically impossible, but we handle it just in case.
+    if (instance.sustainer?.isPending) {
+      instance.sustainer.reject(
+        new Error(
+          sustainer
+            ? "Sustainer replaced while previous sustainer was still pending"
+            : "Sustainer removed while pending, likely due to nested modal unmounting.",
+        ),
+      );
+    }
+
+    instance.sustainer = sustainer;
+
+    // Note: no need to notify listeners since nothing reacts to sustainer changes.
+    // It is only used internally in the promise chain
   }
 
   unmount(component: AnyModalComponent) {
@@ -44,9 +68,12 @@ export class ModalStore {
       return;
     }
 
-    for (const { deferredPromise } of componentInstances.values()) {
-      if (!deferredPromise.isResolved) {
-        deferredPromise.reject(new Error("Modal unmounted before resolution"));
+    for (const { result: value, sustainer } of componentInstances.values()) {
+      if (value.isPending) {
+        value.reject(new Error("Modal unmounted before resolution"));
+      }
+      if (sustainer?.isPending) {
+        sustainer.reject(new Error("Modal unmounted before resolution"));
       }
     }
 
@@ -64,10 +91,12 @@ export class ModalStore {
       this.notifyListeners();
     }
 
-    await this.sustainers.get(instanceId);
-
-    this.#state.instances.get(component)?.delete(instanceId);
-    this.notifyListeners();
+    try {
+      await instance?.sustainer?.promise;
+    } finally {
+      this.#state.instances.get(component)?.delete(instanceId);
+      this.notifyListeners();
+    }
   }
 
   async spawn<Resolution>(
@@ -82,7 +111,7 @@ export class ModalStore {
       this.#state.instances.set(component, componentInstances);
     }
 
-    const deferredPromise = deferPromise((promise) =>
+    const result = deferPromise((promise) =>
       promise.then(async (resolution) => {
         await this.removeInstance(component, instanceId);
         return resolution;
@@ -91,7 +120,7 @@ export class ModalStore {
 
     componentInstances.set(instanceId, {
       open: false,
-      deferredPromise,
+      result,
       propsGivenViaSpawnInvocation: props,
     });
 
@@ -107,7 +136,7 @@ export class ModalStore {
       this.notifyListeners();
     }
 
-    return deferredPromise.promise as Promise<Resolution>;
+    return result.promise as Promise<Resolution>;
   }
 
   resolve<Resolution>(
@@ -116,8 +145,8 @@ export class ModalStore {
     value: Resolution,
   ): void {
     const instance = this.#state.instances.get(component)?.get(instanceId);
-    if (instance && !instance.deferredPromise.isResolved) {
-      instance.deferredPromise.resolve(value);
+    if (instance?.result.isPending) {
+      instance.result.resolve(value);
     }
   }
 
@@ -142,7 +171,8 @@ export interface ModalStoreState {
 export interface ModalInstance {
   open: boolean;
   readonly propsGivenViaSpawnInvocation: Readonly<Record<string, unknown>>;
-  readonly deferredPromise: DeferredPromise<unknown>;
+  readonly result: DeferredPromise<unknown>;
+  sustainer?: DeferredPromise<void>;
 }
 
 export type InstanceId = string;
