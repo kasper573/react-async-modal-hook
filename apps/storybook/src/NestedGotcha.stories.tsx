@@ -21,20 +21,18 @@ export const UseModal: StoryObj = {
 
         <Typography gutterBottom>
           This story demonstrates that you can use `useModal` in nested modal
-          components and showcases how it behaves.
+          components and showcases how the gotcha outlined in the readme
+          behaves.
         </Typography>
 
-        <Button onClick={() => showDrawer()} sx={{ pb: 2 }}>
-          Open drawer
-        </Button>
-
-        <Typography>
-          To illustrate the nested modal component gotcha outlined in the
-          readme, follow the demo above and open a drawer which in turn lets you
-          open a notification, and then while the notification is still open,
-          close the drawer. You will see that the notification unmounts
-          immediately without playing its exit animation.
+        <Typography gutterBottom>
+          How to produce the issue: Open the drawer which in turn lets you open
+          a notification, and then while the notification is still open, close
+          the drawer. You will see that the notification unmounts immediately
+          without playing its exit animation.
         </Typography>
+
+        <Button onClick={() => showDrawer()}>Open drawer</Button>
       </>
     );
   },
