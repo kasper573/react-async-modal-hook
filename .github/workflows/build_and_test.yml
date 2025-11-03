@@ -1,6 +1,11 @@
 name: Build and Test
 on: [push]
 
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
 jobs:
   conventions:
     runs-on: ubuntu-latest
@@ -10,7 +15,7 @@ jobs:
       - run: pnpm lint:check
       - run: pnpm format:check
 
-  test:
+  build_and_test_library:
     runs-on: ubuntu-latest
     container: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
@@ -30,9 +35,17 @@ jobs:
           name: playwright
           path: "**/.playwright/**"
 
-  build:
+  deploy_storybook:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/composites/install/
       - run: pnpm build
+
+      - name: Upload Storybook artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./apps/storybook/storybook-static
+
+      - name: Deploy to GitHub Pages
+        uses: actions/deploy-pages@v4
