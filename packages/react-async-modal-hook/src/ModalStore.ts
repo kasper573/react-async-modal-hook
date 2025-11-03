@@ -158,7 +158,7 @@ export class ModalStore {
   private _idCounter = 0;
 
   private nextId(): InstanceId {
-    return (this._idCounter++).toString();
+    return this._idCounter++;
   }
 }
 
@@ -180,7 +180,7 @@ export interface ModalInstance {
   sustainer?: DeferredPromise<void>;
 }
 
-export type InstanceId = string;
+export type InstanceId = number;
 
 export type StoreUnsubscriber = () => void;
 
