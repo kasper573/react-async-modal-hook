@@ -16,6 +16,7 @@ export function Drawer({
       onClose={() => resolve()}
       onTransitionEnd={open ? undefined : () => sustain.resolve()}
       anchor="right"
+      disablePortal
       {...muiDrawerProps}
     >
       <Box p={2} width={400}>
