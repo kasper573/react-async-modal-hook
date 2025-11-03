@@ -1,0 +1,38 @@
+{
+  "name": "react-async-modal-hook",
+  "version": "1.0.2",
+  "license": "MIT",
+  "type": "module",
+  "keywords": [
+    "react",
+    "modal",
+    "async",
+    "hook",
+    "typescript"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kasper573/react-async-modal-hook.git"
+  },
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "tsconfig"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --clean --dts --format esm,cjs --out-dir dist",
+    "dev": "tsup src/index.ts --watch --dts --format esm,cjs --out-dir dist --sourcemap",
+    "prepublishOnly": "pnpm build"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:",
+    "tsup": "^8"
+  }
+}

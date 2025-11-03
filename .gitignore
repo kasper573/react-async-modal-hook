@@ -2,3 +2,7 @@ node_modules
 dist
 .idea
 .vscode
+.playwright
+.cache
+*storybook.log
+storybook-static

@@ -1,0 +1,19 @@
+{
+  "name": "@repo/playwright",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "test": "playwright test -c playwright-ct.config.ts"
+  },
+  "devDependencies": {
+    "react-async-modal-hook": "workspace:*",
+    "@playwright/experimental-ct-react": "1.56.1",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:",
+    "@vitejs/plugin-react": "catalog:",
+    "vite": "catalog:"
+  }
+}

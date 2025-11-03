@@ -7,19 +7,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/composites/install/
-      - run: pnpm format
+      - run: pnpm lint:check
+      - run: pnpm format:check
 
   test:
     runs-on: ubuntu-latest
-    container:
-      image: mcr.microsoft.com/playwright:v1.42.1-jammy # Has to be same version as in package.json
+    container: mcr.microsoft.com/playwright:v1.56.1-noble
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/composites/install/
-      - run: pnpm test
-        env:
-          HOME: /root # Workaround required when using playwright image in ghactions. See https://github.com/microsoft/playwright/issues/6500#issuecomment-845919578
-      - uses: actions/upload-artifact@v4
+
+      - name: Build library
+        run: pnpm -F react-async-modal-hook build # Required for tests
+
+      - name: Run tests
+        run: pnpm test
+
+      - name: Upload Playwright artifacts
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: playwright
@@ -31,5 +36,3 @@ jobs:
       - uses: actions/checkout@v4
       - uses: ./.github/workflows/composites/install/
       - run: pnpm build
-        env:
-          NODE_ENV: development

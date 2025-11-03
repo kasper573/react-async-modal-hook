@@ -1,0 +1,6 @@
+{
+  "extends": "react-async-modal-hook/tsconfig.json",
+  "compilerOptions": {
+    "moduleResolution": "bundler"
+  }
+}
