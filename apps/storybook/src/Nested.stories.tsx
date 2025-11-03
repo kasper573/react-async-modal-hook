@@ -28,35 +28,12 @@ export const UseModal: StoryObj = {
           Open drawer
         </Button>
 
-        <Typography gutterBottom>
-          One gotcha with nesting is that if the component that uses `useModal`
-          unmounts while it still has modals open, those modals will also
-          unmount, even if they are suspended by `useModalSustainer`, so exit
-          animations won't play. If you try out this demo you can observe this
-          behavior.
-        </Typography>
-
-        <Typography gutterBottom>
-          This is fine for the vast majority of use cases since in practice you
-          rarely do this. And if you do, you are probably integrating with a
-          global event system like notifications, in which case you should be
-          moving up the useModal call higher up your react tree.
-        </Typography>
-
-        <Typography gutterBottom>
-          This behavior is a combination of simplicity and safe guards. It is
-          really easy to build and maintain, and guarantees that you won't have
-          modals lingering around in case of unexpected unmounts. The
-          alternative would be to rebuild the library to have first class
-          nesting support built-in to the sustainer feature, but that would be
-          excessively complex for little gain.
-        </Typography>
-
         <Typography>
-          To illustrate this issue, follow the demo above and open a drawer
-          which in turn lets you open a notification, and then while the
-          notification is still open, close the drawer. You will see that the
-          notification unmounts immediately without playing its exit animation.
+          To illustrate the nested modal component gotcha outlined in the
+          readme, follow the demo above and open a drawer which in turn lets you
+          open a notification, and then while the notification is still open,
+          close the drawer. You will see that the notification unmounts
+          immediately without playing its exit animation.
         </Typography>
       </>
     );

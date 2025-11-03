@@ -224,6 +224,8 @@ function AnimatedDialog({ open, resolve }: ModalProps<string>) {
 }
 ```
 
+Note: See [Nested `useModal` calls](#nested-usemodal-calls) for a gotcha when using nested modals with sustainers.
+
 ## Multiple modal instances
 
 The same modal component can have multiple instances open simultaneously:
@@ -319,3 +321,15 @@ modalStore.setOutlet(document.getElementById("custom-modal-root"));
 ```
 
 > In fact, the `ModalOutlet` component is just a simple div component that assigns its ref as the outlet on the `ModalStore` when mounted.
+
+## Nested `useModal` calls
+
+> For example, a drawer modal that spawns notification modals. See the [Nested](https://github.com/kasper573/react-async-modal-hook/blob/main/apps/storybook/src/Nested.stories.tsx) storybook story for a demo of this behavior.
+
+This is supported. You can have components that use `useModal` to spawn modals from within modals, but there is one gotcha to be aware of when doing this, especially when using `useModalSustainer` for exit animations:
+
+If a component that uses `useModal` unmounts while it still has modals open, those modals will also unmount, regardless if you are using `useModalSustainer`. The promises of the discarded modals will be rejected, so you will still have an opportunity to handle this scenario by catching the promise rejection. However, for components using sustainers to keep exit animations running, the animations simply won't finish playing before the modals are unmounted.
+
+This is fine for the vast majority of use cases since in practice you rarely do this, as `useModal` is intended for modals which by nature prompt the user until an action has been chosen. However, if using `useModal` for notification modals like snackbars/toasts or other similar non blocking UI patterns, then discarding the modals early may not be desirable. But in those cases you can and should solve the problem by using a global event system, and plugging those events into `useModal` higher up in your react tree, likely in the app root.
+
+This limitation is an intentional design choice to keep the library simple and robust. This approach is really easy to build and maintain, and guarantees that you won't have modals lingering around in case of unexpected unmounts. The alternative would be to rebuild the library to have first class nesting support built-in to the sustainer feature, but that would be excessively complex for little gain, since the vast majority of use cases don't require it.
