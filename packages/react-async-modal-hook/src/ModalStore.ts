@@ -117,23 +117,22 @@ export class ModalStore {
       }),
     );
 
-    componentInstances.set(instanceId, {
+    const instance: ModalInstance = {
       open: false,
       result,
       propsGivenViaSpawnInvocation: props,
-    });
+    };
 
-    this.notifyListeners();
+    componentInstances.set(instanceId, instance);
 
-    // Wait to let the instance render as closed first.
+    // Notify and wait to let the new instance render as closed first.
     // This makes it drastically easier to do enter animations in css.
+    this.notifyListeners();
     await nextTick();
 
-    const instance = this.#state.instances.get(component)?.get(instanceId);
-    if (instance) {
-      instance.open = true;
-      this.notifyListeners();
-    }
+    // Now we can open the modal
+    instance.open = true;
+    this.notifyListeners();
 
     return result.promise as Promise<Resolution>;
   }
