@@ -25,9 +25,13 @@ export function Drawer({
     <MuiDrawer
       open={open}
       onClose={() => resolve()}
-      onTransitionEnd={open ? undefined : () => sustain.resolve()}
+      slotProps={{
+        transition: {
+          onExited: () => sustain.resolve(),
+        },
+      }}
       anchor="right"
-      disablePortal
+      disablePortal // Portalling already handled by react-async-modal-hook
       {...muiDrawerProps}
     >
       <Box p={2} width={400}>

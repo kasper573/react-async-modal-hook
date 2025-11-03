@@ -17,7 +17,11 @@ export function Snackbar({
   return (
     <MuiSnackbar
       open={open}
-      onTransitionEnd={open ? undefined : () => sustain.resolve()}
+      slotProps={{
+        transition: {
+          onExited: () => sustain.resolve(),
+        },
+      }}
       message={message}
       action={
         <IconButton

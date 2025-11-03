@@ -40,8 +40,7 @@ export function Dialog({
       slots={{ transition: Transition }}
       slotProps={{
         transition: {
-          // End sustain when the closing transition ends
-          onTransitionEnd: open ? undefined : () => sustain.resolve(),
+          onExited: () => sustain.resolve(),
         },
       }}
       {...muiDialogProps}
