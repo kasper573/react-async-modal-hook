@@ -29,6 +29,5 @@ function describeResult(result: Result): string {
   if ("resolution" in result) {
     return `Resolved with: ${result.resolution}`;
   }
-    return `Rejected with: ${String(result.error)}`;
-  
+  return `Rejected with: ${String(result.error)}`;
 }

@@ -1,6 +1,6 @@
 import type { ComponentProps, ReactElement } from "react";
 import { forwardRef } from "react";
-import type { ModalProps} from "react-async-modal-hook";
+import type { ModalProps } from "react-async-modal-hook";
 import { useModalSustainer } from "react-async-modal-hook";
 import {
   Dialog as MuiDialog,

@@ -1,4 +1,4 @@
-import type { ModalProps} from "react-async-modal-hook";
+import type { ModalProps } from "react-async-modal-hook";
 import { useModalSustainer } from "react-async-modal-hook";
 import { Box, Drawer as MuiDrawer, Typography } from "@mui/material";
 import type { ComponentProps } from "react";

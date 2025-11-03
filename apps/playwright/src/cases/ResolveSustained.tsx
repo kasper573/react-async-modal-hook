@@ -1,4 +1,4 @@
-import type { ComponentProps} from "react";
+import type { ComponentProps } from "react";
 import { useState } from "react";
 import { useModal, useModalSustainer } from "react-async-modal-hook";
 import { createTestCase } from "../create-test-case";
