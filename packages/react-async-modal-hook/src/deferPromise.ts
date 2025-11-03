@@ -21,7 +21,7 @@ export function deferPromise<T>(
     },
     reject(reason) {
       status = "rejected";
-      // oxlint-disable-next-line no-non-null-assertion - We know reject is assigned
+
       reject!(reason);
     },
     get isResolved() {
