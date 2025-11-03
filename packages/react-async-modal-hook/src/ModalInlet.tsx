@@ -1,5 +1,10 @@
 import { createContext, useContext, useEffect, useState } from "react";
-import { AnyModalComponent, InstanceId, ModalProps } from "./ModalStore";
+import type {
+  AnyModalComponent,
+  AnyModalProps,
+  InstanceId,
+  ModalProps,
+} from "./ModalStore";
 import { ModalContext } from "./ModalContext";
 import { ModalPortal } from "./ModalPortal";
 
@@ -7,7 +12,7 @@ import { ModalPortal } from "./ModalPortal";
 // (Generics would only improve the dx for using the component directly outside the library)
 export interface ModalInletProps {
   component: AnyModalComponent;
-  defaultProps?: DefaultModalProps<ModalProps<any>>;
+  defaultProps?: DefaultModalProps<AnyModalProps>;
 }
 
 /**
@@ -55,11 +60,11 @@ export const ModalInstanceContext = createContext<InstanceId | undefined>(
   undefined,
 );
 
-export type ExcessModalProps<Props extends ModalProps<any>> = Omit<
+export type ExcessModalProps<Props extends AnyModalProps> = Omit<
   Props,
   keyof ModalProps<unknown>
 >;
 
-export type DefaultModalProps<Props extends ModalProps<any>> = Partial<
+export type DefaultModalProps<Props extends AnyModalProps> = Partial<
   ExcessModalProps<Props>
 >;

@@ -1,4 +1,5 @@
-import { ReactNode, useContext, useSyncExternalStore } from "react";
+import type { ReactNode} from "react";
+import { useContext, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { ModalContext } from "./ModalContext";
 

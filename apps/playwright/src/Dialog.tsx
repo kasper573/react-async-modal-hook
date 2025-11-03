@@ -1,5 +1,5 @@
-import { CSSProperties, ReactNode } from "react";
-import { ModalProps } from "react-async-modal-hook";
+import type { CSSProperties, ReactNode } from "react";
+import type { ModalProps } from "react-async-modal-hook";
 
 export function Dialog<Resolution = unknown>({
   open,

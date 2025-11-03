@@ -28,7 +28,7 @@ type Result = { resolution: string } | { error: unknown };
 function describeResult(result: Result): string {
   if ("resolution" in result) {
     return `Resolved with: ${result.resolution}`;
-  } else {
-    return `Rejected with: ${String(result.error)}`;
   }
+    return `Rejected with: ${String(result.error)}`;
+  
 }

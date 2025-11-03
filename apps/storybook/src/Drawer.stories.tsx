@@ -1,4 +1,4 @@
-import { Meta, StoryObj } from "@storybook/react-vite";
+import type { Meta, StoryObj } from "@storybook/react-vite";
 import { useModal } from "react-async-modal-hook";
 import { Button } from "@mui/material";
 import { Drawer } from "./Drawer";

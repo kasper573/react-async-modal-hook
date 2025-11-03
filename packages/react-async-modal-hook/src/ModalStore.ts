@@ -1,5 +1,6 @@
-import { ComponentType } from "react";
-import { deferPromise, DeferredPromise } from "./deferPromise";
+import type { ComponentType } from "react";
+import type { DeferredPromise } from "./deferPromise";
+import { deferPromise } from "./deferPromise";
 
 export class ModalStore {
   private sustainers = new Map<InstanceId, Promise<void>>();
@@ -150,7 +151,10 @@ export type StoreUnsubscriber = () => void;
 
 export type ModalStoreListener = () => void;
 
-export type AnyModalComponent = ComponentType<ModalProps<any>>;
+export type AnyModalComponent = ComponentType<AnyModalProps>;
+
+// oxlint-disable-next-line no-explicit-any - This is only used for generic constraints, so it's fine
+export type AnyModalProps = ModalProps<any>;
 
 /**
  * The props that any component that wants to be compatible with useModal must accept.

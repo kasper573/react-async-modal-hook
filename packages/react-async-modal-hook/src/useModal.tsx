@@ -1,11 +1,16 @@
 import type { ComponentProps, ComponentType, ReactElement } from "react";
 import { useCallback, useContext, useEffect, useMemo } from "react";
 import { ModalContext } from "./ModalContext";
-import { DefaultModalProps, ExcessModalProps, ModalInlet } from "./ModalInlet";
-import { AnyModalComponent, ModalProps } from "./ModalStore";
+import type { DefaultModalProps, ExcessModalProps } from "./ModalInlet";
+import { ModalInlet } from "./ModalInlet";
+import type {
+  AnyModalComponent,
+  AnyModalProps,
+  ModalProps,
+} from "./ModalStore";
 
 export function useModal<
-  Props extends ModalProps<any>,
+  Props extends AnyModalProps,
   DefaultProps extends DefaultModalProps<Props> = {},
 >(
   component: ComponentType<Props>,
@@ -23,16 +28,26 @@ export function useModal<
     [component],
   );
 
-  useEffect(() => () => store.unmount(uniqueComponent), []);
+  useEffect(
+    () => () => store.unmount(uniqueComponent),
+    [store, uniqueComponent],
+  );
 
-  return [
-    useCallback((...[props]) => store.spawn(uniqueComponent, props), [store]),
-    <ModalInlet component={uniqueComponent} defaultProps={defaultProps} />,
-  ];
+  const spawn: ModalSpawner<Props, DefaultProps> = useCallback(
+    (...[props]) => store.spawn(uniqueComponent, props),
+    [store, uniqueComponent],
+  );
+
+  const inlet = (
+    <ModalInlet component={uniqueComponent} defaultProps={defaultProps} />
+  );
+
+  return [spawn, inlet];
 }
 
+// oxlint-disable-next-line no-explicit-any - Generic constraints any is fine
 function copyComponent<T extends ComponentType<any>>(Component: T): T {
-  const copy = (props: ComponentProps<T>) => <Component {...(props as any)} />;
+  const copy = (props: ComponentProps<T>) => <Component {...props} />;
   return copy as T;
 }
 
@@ -41,7 +56,7 @@ function copyComponent<T extends ComponentType<any>>(Component: T): T {
  * when the modal is closed and with the value output by the modal.
  */
 export type ModalSpawner<
-  Props extends ModalProps<any>,
+  Props extends AnyModalProps,
   DefaultProps extends DefaultModalProps<Props>,
 > = (
   ...args: OptionalArgIfNoRequiredKeys<
@@ -50,7 +65,7 @@ export type ModalSpawner<
 ) => Promise<ResolutionFromProps<Props>>;
 
 export type UseModalReturn<
-  Props extends ModalProps<any>,
+  Props extends AnyModalProps,
   DefaultProps extends DefaultModalProps<Props>,
 > = [
   spawn: ModalSpawner<Props, DefaultProps>,
@@ -63,7 +78,7 @@ export type UseModalReturn<
 type MakePartial<T, K extends PropertyKey> = Omit<T, K> &
   Partial<Omit<T, Exclude<keyof T, K>>>;
 
-type ResolutionFromProps<Props extends ModalProps<any>> =
+type ResolutionFromProps<Props extends AnyModalProps> =
   Props extends ModalProps<infer R> ? R : never;
 
 type RequiredKeys<T> = {

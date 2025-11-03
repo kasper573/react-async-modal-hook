@@ -1,4 +1,5 @@
-import { useContext, HTMLAttributes } from "react";
+import type { HTMLAttributes } from "react";
+import { useContext } from "react";
 import { ModalContext } from "./ModalContext";
 
 export function ModalOutlet(props: HTMLAttributes<HTMLDivElement>) {

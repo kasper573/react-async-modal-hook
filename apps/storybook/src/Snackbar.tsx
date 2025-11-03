@@ -1,7 +1,8 @@
-import { ModalProps, useModalSustainer } from "react-async-modal-hook";
+import type { ModalProps} from "react-async-modal-hook";
+import { useModalSustainer } from "react-async-modal-hook";
 import { IconButton, Snackbar as MuiSnackbar } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { ComponentProps } from "react";
+import type { ComponentProps } from "react";
 
 export function Snackbar({
   open,

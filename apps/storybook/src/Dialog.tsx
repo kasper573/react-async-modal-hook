@@ -1,5 +1,7 @@
-import { ComponentProps, forwardRef, ReactElement } from "react";
-import { ModalProps, useModalSustainer } from "react-async-modal-hook";
+import type { ComponentProps, ReactElement } from "react";
+import { forwardRef } from "react";
+import type { ModalProps} from "react-async-modal-hook";
+import { useModalSustainer } from "react-async-modal-hook";
 import {
   Dialog as MuiDialog,
   DialogTitle,
@@ -9,7 +11,7 @@ import {
   Button,
   Slide,
 } from "@mui/material";
-import { TransitionProps } from "@mui/material/transitions";
+import type { TransitionProps } from "@mui/material/transitions";
 
 export function Dialog({
   open,

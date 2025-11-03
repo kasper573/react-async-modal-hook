@@ -16,10 +16,12 @@ export function deferPromise<T>(
     promise,
     resolve(value) {
       status = "resolved";
+      // oxlint-disable-next-line no-non-null-assertion - We know resolve is assigned
       resolve!(value);
     },
     reject(reason) {
       status = "rejected";
+      // oxlint-disable-next-line no-non-null-assertion - We know reject is assigned
       reject!(reason);
     },
     get isResolved() {
