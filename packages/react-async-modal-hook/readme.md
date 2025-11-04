@@ -259,7 +259,7 @@ import {
 } from "@mui/material";
 import { ModalProps, useModalSustainer } from "react-async-modal-hook";
 
-function ConfirmDialog({
+export function ConfirmDialog({
   open,
   resolve,
   title,
@@ -276,8 +276,10 @@ function ConfirmDialog({
       onClose={() => resolve(false)}
       // This may differ based on the UI library you use,
       // but it usually involves hooking into the exit transition.
-      TransitionProps={{
-        onExited: () => sustainer.resolve(), // Wait for MUI's exit transition
+      slotProps={{
+        transition: {
+          onExited: () => sustainer.resolve(), // Wait for MUI's exit transition
+        },
       }}
       // Remember to disable any built-in portals
       // since it's already handled by the library
