@@ -8,6 +8,8 @@ export class ModalStore {
     instances: new Map(),
   };
 
+  constructor(private options: { isStrictModeEnabled: boolean }) {}
+
   subscribe = (listener: ModalStoreListener): StoreUnsubscriber => {
     this.#listeners.add(listener);
     return () => this.#listeners.delete(listener);
@@ -45,7 +47,8 @@ export class ModalStore {
     // Graceful error handling for unmount edge cases.
     // ie. when forgetting to resolve a sustainer before unmount
     // Note that the replace error should be practically impossible, but we handle it just in case.
-    if (instance.sustainer?.isPending) {
+    // Don't reject pending sustainers if in strict mode, as remounts are expected behavior.
+    if (instance.sustainer?.isPending && !this.options.isStrictModeEnabled) {
       instance.sustainer.reject(
         new Error(
           sustainer

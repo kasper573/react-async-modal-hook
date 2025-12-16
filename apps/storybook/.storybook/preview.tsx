@@ -27,7 +27,10 @@ const preview: Preview = {
 };
 
 function Providers({ children }: { children?: ReactNode }) {
-  const store = useMemo(() => new ModalStore(), []);
+  const store = useMemo(
+    () => new ModalStore({ isStrictModeEnabled: true }),
+    [],
+  );
   return (
     <StrictMode>
       <ModalContext.Provider value={store}>

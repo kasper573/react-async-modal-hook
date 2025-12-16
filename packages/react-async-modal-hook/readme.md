@@ -119,13 +119,23 @@ import { useMemo } from "react";
 import { ModalStore, ModalContext, ModalOutlet } from "react-async-modal-hook";
 
 function App() {
-  const modalStore = useMemo(() => new ModalStore(), []);
+  const modalStore = useMemo(
+    () =>
+      new ModalStore({
+        // The library must know if React StrictMode is enabled.
+        // Since strict mode is disabled in prod you can do this in ie. vite:
+        isStrictModeEnabled: import.meta.env.MODE !== "production",
+      }),
+    [],
+  );
 
   return (
-    <ModalContext.Provider value={modalStore}>
-      <YourAppContent />
-      <ModalOutlet />
-    </ModalContext.Provider>
+    <StrictMode>
+      <ModalContext.Provider value={modalStore}>
+        <YourAppContent />
+        <ModalOutlet />
+      </ModalContext.Provider>
+    </StrictMode>
   );
 }
 ```
@@ -316,7 +326,7 @@ By default modals render into the `<ModalOutlet />`. It is just an unstyled div,
 If you're integrating with something outside react, you can set any dom element as the react portal target by assigning it to the `ModalStore`:
 
 ```tsx
-const modalStore = new ModalStore();
+const modalStore = new ModalStore(...);
 modalStore.setOutlet(document.getElementById("custom-modal-root"));
 ```
 
