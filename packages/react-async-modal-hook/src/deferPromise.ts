@@ -5,9 +5,10 @@ export function deferPromise<T>(
   let reject: DeferredPromise<T>["reject"];
 
   const promise = chain(
-    new Promise<T>(
-      (_resolve, _reject) => ((resolve = _resolve), (reject = _reject)),
-    ),
+    new Promise<T>((_resolve, _reject) => {
+      resolve = _resolve;
+      reject = _reject;
+    }),
   );
 
   let status: "resolved" | "rejected" | "pending" = "pending";
