@@ -4,7 +4,7 @@ import "@fontsource/roboto/400.css";
 import "@fontsource/roboto/500.css";
 import "@fontsource/roboto/700.css";
 import type { ReactNode } from "react";
-import { useMemo } from "react";
+import { StrictMode, useMemo } from "react";
 import { CssBaseline } from "@mui/material";
 import { ModalStore, ModalContext, ModalOutlet } from "react-async-modal-hook";
 
@@ -29,11 +29,13 @@ const preview: Preview = {
 function Providers({ children }: { children?: ReactNode }) {
   const store = useMemo(() => new ModalStore(), []);
   return (
-    <ModalContext.Provider value={store}>
-      <CssBaseline />
-      {children}
-      <ModalOutlet />
-    </ModalContext.Provider>
+    <StrictMode>
+      <ModalContext.Provider value={store}>
+        <CssBaseline />
+        {children}
+        <ModalOutlet />
+      </ModalContext.Provider>
+    </StrictMode>
   );
 }
 
