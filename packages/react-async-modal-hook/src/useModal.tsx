@@ -38,11 +38,18 @@ export function useModal<
     [store, uniqueComponent],
   );
 
+  const options: UseModalOptions<Props> = useMemo(
+    () => ({
+      resolveAll: (value) => store.resolveAll(uniqueComponent, value),
+    }),
+    [store, uniqueComponent],
+  );
+
   const inlet = (
     <ModalInlet component={uniqueComponent} defaultProps={defaultProps} />
   );
 
-  return [spawn, inlet];
+  return [spawn, inlet, options];
 }
 
 // oxlint-disable-next-line no-explicit-any - Generic constraints any is fine
@@ -73,7 +80,15 @@ export type UseModalReturn<
    * A `ModalInlet` element preconfigured with the modal component and default props passed to `useModal`.
    */
   inlet: ReactElement,
+  options: UseModalOptions<Props>,
 ];
+
+export interface UseModalOptions<Props extends AnyModalProps> {
+  /**
+   * Resolves ALL the modal instances for this specific component.
+   */
+  resolveAll: (value: ResolutionFromProps<Props>) => void;
+}
 
 type MakePartial<T, K extends PropertyKey> = Omit<T, K> &
   Partial<Omit<T, Exclude<keyof T, K>>>;

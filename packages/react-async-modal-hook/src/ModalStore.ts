@@ -140,6 +140,17 @@ export class ModalStore {
     return result.promise as Promise<Resolution>;
   }
 
+  resolveAll<Resolution>(component: AnyModalComponent, value: Resolution) {
+    const componentInstances = this.#state.instances.get(component);
+    if (!componentInstances) {
+      return;
+    }
+
+    for (const [instanceId] of componentInstances.entries()) {
+      this.resolve(component, instanceId, value);
+    }
+  }
+
   resolve<Resolution>(
     component: AnyModalComponent,
     instanceId: InstanceId,
